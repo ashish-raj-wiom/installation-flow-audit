@@ -135,6 +135,12 @@
   tr:last-child td { border-bottom: none; }
   td .stage-name { font-weight: 600; }
   td .formula { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  tr.main-row td { background: color-mix(in srgb, var(--muted) 5%, var(--surface)); }
+  tr.main-row td .stage-name { font-size: 14.5px; }
+  tr.sub-row td { border-bottom-color: color-mix(in srgb, var(--grid) 55%, var(--surface)); }
+  tr.sub-row td:first-child { padding-left: 34px; }
+  tr.sub-row .stage-name { font-weight: 500; color: var(--ink-2); font-size: 13px; }
+  tr.sub-row .stage-name::before { content: "└ "; color: var(--muted); }
   td.num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 650; }
   td .d1 { font-size: 11px; color: var(--muted); font-weight: 400; }
 
@@ -245,13 +251,13 @@
       <div class="flow-strip">
         <div class="fstep"><div class="fs-name">Booking Verified</div><div class="fs-actor">Customer</div></div>
         <div class="farrow">→</div>
-        <div class="fstep"><div class="fs-name">Connection Created + Requested</div><div class="fs-actor">System</div></div>
-        <div class="farrow">→</div>
-        <div class="fstep"><div class="fs-name">CSP Assigned (DAS)</div><div class="fs-actor">System</div></div>
+        <div class="fstep"><div class="fs-name">Connection Created → Assigned (DAS)</div><div class="fs-actor">System</div></div>
         <div class="farrow">→</div>
         <div class="fstep"><div class="fs-name">Task Created (TAS)</div><div class="fs-actor">System</div></div>
         <div class="farrow">→</div>
-        <div class="fstep"><div class="fs-name">PN + FPN sent → delivered</div><div class="fs-actor">System · attention</div></div>
+        <div class="fstep"><div class="fs-name">Notification Sent</div><div class="fs-actor">System · PN + FPN</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">Task Attention</div><div class="fs-actor">System · delivered</div></div>
         <div class="farrow">→</div>
         <div class="fstep"><div class="fs-name">Task Opened</div><div class="fs-actor">CSP</div></div>
         <div class="farrow">→</div>
@@ -283,17 +289,48 @@
     </div>
   </section>
 
-  <!-- ============ SCORECARD ============ -->
+  <!-- ============ THE SPINE ============ -->
   <section>
-    <div class="kicker">Stage-by-stage scorecard</div>
-    <h2>Where the funnel is healthy and where it leaks</h2>
-    <p class="lede"><span class="badge l1">L1</span>&nbsp; system-health metrics — pure plumbing, these should sit at
-    ~100%; anything lower is a defect to fix. &nbsp;<span class="badge">L2</span>&nbsp; workflow metrics — conversion
-    steps involving human action; these are moved by product and behavioral levers. Values marked
-    <span class="chip missing">missing</span> are instrumentation or reporting gaps being filled now.</p>
+    <div class="kicker">The spine of this document</div>
+    <h2>Task Created → Notification Sent → Attention → Open → Response</h2>
+    <p class="lede">Every installation task lives or dies through these five steps. Each step below shows the headline
+    rate, with its component metrics nested underneath. <span class="badge l1">L1</span>&nbsp; system-health metrics —
+    pure plumbing, these should sit at ~100%; anything lower is a defect to fix.
+    &nbsp;<span class="badge">L2</span>&nbsp; workflow metrics — conversion steps involving human action, moved by
+    product and behavioral levers. Values marked <span class="chip missing">missing</span> are instrumentation or
+    reporting gaps being filled now.</p>
 
     <div class="tbl-scroll">
-      <table id="scorecard">
+      <table id="spine">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Metric</th>
+            <th>Type</th>
+            <th style="min-width: 230px;">Value</th>
+            <th>D-1</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody><!-- rendered by script --></tbody>
+      </table>
+    </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Denominators differ by row (see formula under
+    each metric) — bars show each rate on its own 0–100% scale, not a shared funnel of counts. For the
+    "lower-is-better" rows (decline, timeout) the bar length still shows the rate; the status chip carries the reading.</p>
+
+    <h3>Read of the spine</h3>
+    <p class="sub">Task creation and notification sending are clean (99.8–100%). The spine breaks at exactly two
+    steps: <strong>Attention</strong> — notifications are sent but not reliably delivered (PN 83.9%, FPN 64.6%, both
+    L1 metrics that should be ~100%, and the combined attention rate isn't even measured yet) — and
+    <strong>Response</strong> — only 60% of CSPs who open a task act on it. Everything that doesn't clear the
+    Response step becomes a P41 timeout: the 49.4%.</p>
+
+    <h3>Upstream stages — healthy, for reference</h3>
+    <p class="sub" style="font-size: 13px;">The pre-task plumbing (booking → connection → assignment) and the P41
+    timer itself all run at 99.3–100%. They are not where the funnel leaks.</p>
+    <div class="tbl-scroll" style="margin-top: 10px;">
+      <table id="upstream">
         <thead>
           <tr>
             <th>Stage</th>
@@ -307,16 +344,6 @@
         <tbody><!-- rendered by script --></tbody>
       </table>
     </div>
-    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Denominators differ by row (see formula under
-    each metric) — bars show each rate on its own 0–100% scale, not a shared funnel of counts. For the two
-    "lower-is-better" rows (decline, timeout) the bar length still shows the rate; the status chip carries the reading.</p>
-
-    <h3>Read of the scorecard</h3>
-    <p class="sub">Everything up to task creation is clean — connection creation, DAS assignment and TAS task creation
-    all run at 99.8–100%. The P41 timer itself is also healthy: 99.3% of eligible tasks correctly get timed out when
-    the window lapses, so enforcement is not the problem. The funnel breaks in exactly two places:
-    <strong>notification delivery</strong> (PN 83.9%, FPN 64.6% — both L1 metrics that should be ~100%) and
-    <strong>CSP response behavior</strong> (only 60% of CSPs who open a task act on it).</p>
   </section>
 
   <!-- ============ OUTCOMES ============ -->
@@ -510,13 +537,16 @@
           <tr><td>Connection Requested Rate</td><td># Connections Requested ÷ # Connections Created</td><td>L1</td></tr>
           <tr><td>Connection Assigned Rate</td><td># Connections Assigned (DAS) ÷ # Connections Requested</td><td>L1</td></tr>
           <tr><td>Task Creation Rate</td><td># Tasks Created ÷ # Connections Allocated</td><td>L1</td></tr>
+          <tr><td>Notification Sent Rate</td><td>PN + FPN Sent ÷ Tasks Created</td><td>L1</td></tr>
           <tr><td>Install PN Sent Rate</td><td>PN Sent ÷ Tasks Created</td><td>L1</td></tr>
           <tr><td>Install PN Delivery Rate</td><td>PN Delivered ÷ PN Sent</td><td>L1</td></tr>
           <tr><td>FPN Sent Rate</td><td>FPN Sent ÷ Tasks Created</td><td>L1</td></tr>
           <tr><td>FPN Delivery Rate</td><td>FPN Delivered ÷ FPN Sent</td><td>L1</td></tr>
           <tr><td>Task Attention Rate</td><td>Combined (PN + FPN) delivery ÷ Tasks Created</td><td>L1</td></tr>
           <tr><td>Task Open Rate</td><td>(FPN opened + drilldown opened) ÷ Tasks Created</td><td>L2</td></tr>
-          <tr><td>Response Rate</td><td>Responded (slot proposed or declined) ÷ Tasks Opened</td><td>L2</td></tr>
+          <tr><td>FPN Open Rate</td><td>Opened via FPN ÷ Tasks Created</td><td>L2</td></tr>
+          <tr><td>Task Drilldown Open Rate</td><td>Opened via in-app drilldown ÷ Tasks Created</td><td>L2</td></tr>
+          <tr><td>Task Response Rate</td><td>Responded (slot proposed or declined) ÷ Tasks Opened</td><td>L2</td></tr>
           <tr><td>Task Decline Rate</td><td>Declined ÷ Tasks Opened</td><td>L2</td></tr>
           <tr><td>Slot Proposed Rate</td><td>Slot Proposed ÷ Tasks Opened</td><td>L2</td></tr>
           <tr><td>P41 Timeout Rate (workflow)</td><td>P41 Timeouts ÷ Tasks Created</td><td>L2</td></tr>
@@ -541,53 +571,67 @@
 
 <script>
 /* =========================================================================
-   METRIC VALUES — edit this block only.
+   METRIC VALUES — edit these two blocks only.
    value: number (percent) or null  → null renders as "missing"
    d1:    number or null
    status: 'ok' | 'degraded' | 'broken' | 'missing' | 'info'
+   sub: true → renders as an indented component row under the step above it
    ========================================================================= */
-const STAGES = [
-  { stage: "Booking Confirmed / Verified", metric: "# Bookings Verified",        formula: "# Bookings Verified",                    type: "L2", value: 100,  d1: 100,  status: "ok",       label: "OK" },
-  { stage: "Connection Created",           metric: "Connection Creation Rate",   formula: "Connections Created ÷ Bookings",         type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
-  { stage: "Connection Requested",         metric: "Connection Requested Rate",  formula: "Requested ÷ Created",                    type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
-  { stage: "Connection Assigned (DAS)",    metric: "Connection Assigned Rate",   formula: "Assigned ÷ Requested",                   type: "L1", value: 99.9, d1: 99.6, status: "ok",       label: "OK — zones-table fix in progress" },
-  { stage: "Task Created (TAS)",           metric: "Task Creation Rate",         formula: "Tasks Created ÷ Connections Allocated",  type: "L1", value: 99.8, d1: 100,  status: "ok",       label: "OK" },
-  { stage: "PN Sent",                      metric: "Install PN Sent Rate",       formula: "PN Sent ÷ Tasks Created",                type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
-  { stage: "PN Delivered",                 metric: "Install PN Delivery Rate",   formula: "PN Delivered ÷ PN Sent",                 type: "L1", value: 83.9, d1: null, status: "degraded", label: "Broken — fix A1" },
-  { stage: "FPN Sent",                     metric: "FPN Sent Rate",              formula: "FPN Sent ÷ Tasks Created",               type: "L1", value: 100,  d1: null, status: "ok",       label: "OK" },
-  { stage: "FPN Delivered",                metric: "FPN Delivery Rate",          formula: "FPN Delivered ÷ FPN Sent",               type: "L1", value: 64.6, d1: null, status: "broken",   label: "Broken — fixes A1–A3" },
-  { stage: "Task Attention (combined)",    metric: "Task Attention Rate",        formula: "Combined delivery ÷ Tasks Created",      type: "L1", value: null, d1: null, status: "missing",  label: "Not measured — fix A5" },
-  { stage: "Task Opened",                  metric: "Task Open Rate",             formula: "(FPN + drilldown opened) ÷ Tasks Created", type: "L2", value: 84.3, d1: null, status: "info",   label: "15.7% never opened — fix A4" },
-  { stage: "Response Provided",            metric: "Response Rate",              formula: "Responded ÷ Tasks Opened",               type: "L2", value: 60,   d1: null, status: "broken",   label: "Core leak — Track B" },
-  { stage: "Task Declined",                metric: "Task Decline Rate",          formula: "Declined ÷ Tasks Opened",                type: "L2", value: 17.2, d1: null, status: "info",     label: "Reallocation (P51 cooldown)" },
-  { stage: "Slot Proposed",                metric: "Slot Proposed Rate",         formula: "Slot Proposed ÷ Tasks Opened",           type: "L2", value: 42.5, d1: null, status: "info",     label: "Happy case" },
-  { stage: "P41 Timeout (workflow)",       metric: "P41 Timeout Rate",           formula: "P41 Timeouts ÷ Tasks Created",           type: "L2", value: 49.4, d1: null, status: "broken",   label: "THE problem — both tracks", invert: true },
-  { stage: "P41 Timer (system health)",    metric: "P41 Timeout Hit Rate",       formula: "Timeout Hit ÷ Tasks Eligible",           type: "L1", value: 99.3, d1: null, status: "ok",       label: "Timer enforcement works" },
+const SPINE = [
+  { stage: "1 · Task Created (TAS)",       metric: "Task Creation Rate",         formula: "Tasks Created ÷ Connections Allocated",    type: "L1", value: 99.8, d1: 100,  status: "ok",       label: "OK" },
+
+  { stage: "2 · Notification Sent",        metric: "Notification Sent Rate",     formula: "PN + FPN Sent ÷ Tasks Created",            type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { sub: true, stage: "PN Sent",           metric: "Install PN Sent Rate",       formula: "PN Sent ÷ Tasks Created",                  type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { sub: true, stage: "FPN Sent",          metric: "FPN Sent Rate",              formula: "FPN Sent ÷ Tasks Created",                 type: "L1", value: 100,  d1: null, status: "ok",       label: "OK" },
+
+  { stage: "3 · Task Attention",           metric: "Task Attention Rate",        formula: "Combined (PN + FPN) delivery ÷ Tasks Created", type: "L1", value: null, d1: null, status: "missing", label: "Not measured — fix A5" },
+  { sub: true, stage: "PN Delivered",      metric: "PN Delivery Rate",           formula: "PN Delivered ÷ PN Sent",                   type: "L1", value: 83.9, d1: null, status: "degraded", label: "Broken — fix A1" },
+  { sub: true, stage: "FPN Delivered",     metric: "FPN Delivery Rate",          formula: "FPN Delivered ÷ FPN Sent",                 type: "L1", value: 64.6, d1: null, status: "broken",   label: "Broken — fixes A1–A3" },
+
+  { stage: "4 · Task Opened",              metric: "Task Open Rate",             formula: "(FPN + drilldown opened) ÷ Tasks Created", type: "L2", value: 84.3, d1: null, status: "info",     label: "15.7% never opened — fix A4" },
+  { sub: true, stage: "Opened via FPN",    metric: "FPN Open Rate",              formula: "Opened via FPN ÷ Tasks Created",           type: "L2", value: null, d1: null, status: "missing",  label: "Split not measured" },
+  { sub: true, stage: "Opened via drilldown", metric: "Task Drilldown Open Rate", formula: "Opened via in-app drilldown ÷ Tasks Created", type: "L2", value: null, d1: null, status: "missing", label: "Split not measured" },
+
+  { stage: "5 · Response Provided",        metric: "Task Response Rate",         formula: "Responded (slot or decline) ÷ Tasks Opened", type: "L2", value: 60,  d1: null, status: "broken",   label: "Core leak — Track B" },
+  { sub: true, stage: "Slot Proposed",     metric: "Slot Proposed Rate",         formula: "Slot Proposed ÷ Tasks Opened",             type: "L2", value: 42.5, d1: null, status: "info",     label: "Happy case" },
+  { sub: true, stage: "Declined",          metric: "Task Decline Rate",          formula: "Declined ÷ Tasks Opened",                  type: "L2", value: 17.2, d1: null, status: "info",     label: "Reallocation (P51 cooldown)" },
+
+  { stage: "✕ No response → P41 Timeout",  metric: "P41 Timeout Rate",           formula: "P41 Timeouts ÷ Tasks Created",             type: "L2", value: 49.4, d1: null, status: "broken",   label: "THE problem — both tracks" },
+];
+
+const UPSTREAM = [
+  { stage: "Booking Confirmed / Verified", metric: "# Bookings Verified",        formula: "# Bookings Verified",                    type: "L2", value: 100,  d1: 100,  status: "ok", label: "OK" },
+  { stage: "Connection Created",           metric: "Connection Creation Rate",   formula: "Connections Created ÷ Bookings",         type: "L1", value: 100,  d1: 100,  status: "ok", label: "OK" },
+  { stage: "Connection Requested",         metric: "Connection Requested Rate",  formula: "Requested ÷ Created",                    type: "L1", value: 100,  d1: 100,  status: "ok", label: "OK" },
+  { stage: "Connection Assigned (DAS)",    metric: "Connection Assigned Rate",   formula: "Assigned ÷ Requested",                   type: "L1", value: 99.9, d1: 99.6, status: "ok", label: "OK — zones-table fix in progress" },
+  { stage: "P41 Timer (system health)",    metric: "P41 Timeout Hit Rate",       formula: "Timeout Hit ÷ Tasks Eligible",           type: "L1", value: 99.3, d1: null, status: "ok", label: "Timer enforcement works" },
 ];
 
 const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--critical)", info: "var(--accent)", missing: "transparent" };
 const CHIP = { ok: "ok", degraded: "degraded", broken: "broken", info: "info", missing: "missing" };
 
-const tbody = document.querySelector("#scorecard tbody");
-tbody.innerHTML = STAGES.map(s => {
-  const isMissing = s.value === null || s.value === undefined;
-  const val = isMissing ? "missing" : s.value + "%";
-  const d1 = (s.d1 === null || s.d1 === undefined) ? "—" : s.d1 + "%";
-  const meter = isMissing
-    ? `<div class="meter na"><div class="track"></div><span style="color: var(--muted); font-size: 12.5px; font-weight: 600;">missing</span></div>`
-    : `<div class="meter" style="--fill-c: ${FILL[s.status]}; --track-c: color-mix(in srgb, ${FILL[s.status]} 16%, var(--surface));">
-         <div class="track"><div class="fill" style="width: ${Math.min(s.value, 100)}%;"></div></div>
-         <span class="num" style="font-variant-numeric: tabular-nums; font-weight: 650; min-width: 52px; text-align: right;">${s.value}%</span>
-       </div>`;
-  return `<tr>
-    <td><div class="stage-name">${s.stage}</div></td>
-    <td><div>${s.metric}</div><div class="formula">${s.formula}</div></td>
-    <td><span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span></td>
-    <td>${meter}</td>
-    <td class="num"><span class="d1">${d1}</span></td>
-    <td><span class="chip ${CHIP[s.status]}">${s.label}</span></td>
-  </tr>`;
-}).join("");
+function renderRows(rows, tbody, hierarchical = true) {
+  tbody.innerHTML = rows.map(s => {
+    const isMissing = s.value === null || s.value === undefined;
+    const d1 = (s.d1 === null || s.d1 === undefined) ? "—" : s.d1 + "%";
+    const meter = isMissing
+      ? `<div class="meter na"><div class="track"></div><span style="color: var(--muted); font-size: 12.5px; font-weight: 600;">missing</span></div>`
+      : `<div class="meter" style="--fill-c: ${FILL[s.status]}; --track-c: color-mix(in srgb, ${FILL[s.status]} 16%, var(--surface));">
+           <div class="track"><div class="fill" style="width: ${Math.min(s.value, 100)}%;"></div></div>
+           <span class="num" style="font-variant-numeric: tabular-nums; font-weight: 650; min-width: 52px; text-align: right;">${s.value}%</span>
+         </div>`;
+    return `<tr class="${hierarchical ? (s.sub ? "sub-row" : "main-row") : ""}">
+      <td><div class="stage-name">${s.stage}</div></td>
+      <td><div>${s.metric}</div><div class="formula">${s.formula}</div></td>
+      <td><span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span></td>
+      <td>${meter}</td>
+      <td class="num"><span class="d1">${d1}</span></td>
+      <td><span class="chip ${CHIP[s.status]}">${s.label}</span></td>
+    </tr>`;
+  }).join("");
+}
+renderRows(SPINE, document.querySelector("#spine tbody"));
+renderRows(UPSTREAM, document.querySelector("#upstream tbody"), false);
 </script>
 </body>
 </html>
