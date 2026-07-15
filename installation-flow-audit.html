@@ -292,7 +292,7 @@
    ivn / dl: intervention text and deadline (empty string = none)
    ========================================================================= */
 const ROWS = [
-  { stage: "# Bookings Verified",          formula: "Bookings verified",                              type: "L2", value: 100,  status: "ok",       ivn: "", dl: "" },
+  { stage: "# Bookings Verified",          formula: "Bookings verified",                              type: "",   value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Creation Rate",     formula: "Connections created ÷ Bookings",                 type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Requested Rate",    formula: "Connections requested ÷ Connections created",    type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Assigned Rate",     formula: "CSP assigned ÷ Connections requested",           type: "L1", value: 99.6, status: "ok",       ivn: "", dl: "" },
@@ -340,7 +340,7 @@ document.querySelector("#scorecard tbody").innerHTML = ROWS.map((s, i) => {
   return `<tr class="${s.sub ? "sub-row" : "main-row"}${hasSubs ? " expandable" : ""}" data-group="${groupId}">
     <td><div class="stage-name">${caret}${s.stage}${count}</div></td>
     <td><div class="formula" style="font-size: 12.5px;">${s.formula}</div></td>
-    <td><span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span></td>
+    <td>${s.type ? `<span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span>` : ""}</td>
     <td>${meter}</td>
     <td>${s.ivn ? `<div class="ivn">${s.ivn}</div>` : `<span style="color: var(--muted);">—</span>`}</td>
     <td>${s.dl ? `<span class="dl">${s.dl}</span>` : `<span style="color: var(--muted);">—</span>`}</td>
