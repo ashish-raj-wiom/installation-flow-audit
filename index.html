@@ -105,8 +105,15 @@
   td .dl { font-size: 12px; font-weight: 650; color: var(--good-text); white-space: nowrap; }
   tr.main-row td { background: color-mix(in srgb, var(--muted) 5%, var(--surface)); }
   tr.main-row td .stage-name { font-size: 14px; }
+  tr.main-row.expandable { cursor: pointer; }
+  tr.main-row.expandable:hover td { background: color-mix(in srgb, var(--muted) 9%, var(--surface)); }
+  .caret { display: inline-block; width: 14px; color: var(--muted); font-size: 11px; transition: transform 0.15s; }
+  tr.main-row.expanded .caret { transform: rotate(90deg); }
+  .sub-count { font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+  tr.sub-row { display: none; }
+  tr.sub-row.open { display: table-row; }
   tr.sub-row td { border-bottom-color: color-mix(in srgb, var(--grid) 55%, var(--surface)); }
-  tr.sub-row td:first-child { padding-left: 32px; }
+  tr.sub-row td:first-child { padding-left: 46px; }
   tr.sub-row .stage-name { font-weight: 500; color: var(--ink-2); font-size: 13px; }
   tr.sub-row .stage-name::before { content: "└ "; color: var(--muted); }
 
@@ -236,8 +243,10 @@
         <tbody><!-- rendered by script --></tbody>
       </table>
     </div>
-    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Each rate is on its own 0–100% scale (see
-    definition per row). Red/orange bars = below where the metric should be. Unresponsive Rate is lower-is-better.</p>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Click a metric with ▸ to see its components.
+    Each rate is on its own 0–100% scale (see definition per row). Red/orange bars = below where the metric should be.
+    Unresponsive Rate is lower-is-better. Task Open Rate is the <em>union</em> of FPN Page Open and Task Drilldown
+    Open — a task can be opened via both, so the components don't add up to the parent.</p>
   </section>
 
   <!-- ============ OUTCOMES ============ -->
@@ -270,7 +279,7 @@
 
   <div class="foot">
     Installation Flow Leadership Audit · prepared by Ashish Raj · data from the Installation — Full Stages metrics
-    sheet, D-1 column (14 Jul 2026). Values marked <em>missing</em> are being instrumented and will be updated.
+    sheet, D-1 column (14 Jul 2026).
   </div>
 </div>
 
@@ -311,7 +320,12 @@ const ROWS = [
 
 const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--critical)", info: "var(--accent)", missing: "transparent" };
 
-document.querySelector("#scorecard tbody").innerHTML = ROWS.map(s => {
+let groupId = -1;
+document.querySelector("#scorecard tbody").innerHTML = ROWS.map((s, i) => {
+  if (!s.sub) groupId++;
+  const hasSubs = !s.sub && ROWS[i + 1] && ROWS[i + 1].sub;
+  const subCount = hasSubs ? ROWS.slice(i + 1).findIndex(r => !r.sub) === -1
+    ? ROWS.length - i - 1 : ROWS.slice(i + 1).findIndex(r => !r.sub) : 0;
   const isMissing = s.value === null || s.value === undefined;
   const meter = isMissing
     ? `<div class="meter na"><div class="track"></div><span style="color: var(--muted); font-size: 12.5px; font-weight: 600;">missing</span></div>`
@@ -321,8 +335,10 @@ document.querySelector("#scorecard tbody").innerHTML = ROWS.map(s => {
          </div>
          <span class="num" style="font-variant-numeric: tabular-nums; font-weight: 650; min-width: 52px; text-align: right;">${s.value}%</span>
        </div>`;
-  return `<tr class="${s.sub ? "sub-row" : "main-row"}">
-    <td><div class="stage-name">${s.stage}</div></td>
+  const caret = hasSubs ? `<span class="caret">▸</span>` : (s.sub ? "" : `<span class="caret"></span>`);
+  const count = hasSubs ? `<span class="sub-count">${subCount} component${subCount > 1 ? "s" : ""}</span>` : "";
+  return `<tr class="${s.sub ? "sub-row" : "main-row"}${hasSubs ? " expandable" : ""}" data-group="${groupId}">
+    <td><div class="stage-name">${caret}${s.stage}${count}</div></td>
     <td><div class="formula" style="font-size: 12.5px;">${s.formula}</div></td>
     <td><span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span></td>
     <td>${meter}</td>
@@ -330,6 +346,14 @@ document.querySelector("#scorecard tbody").innerHTML = ROWS.map(s => {
     <td>${s.dl ? `<span class="dl">${s.dl}</span>` : `<span style="color: var(--muted);">—</span>`}</td>
   </tr>`;
 }).join("");
+
+document.querySelectorAll("#scorecard tr.expandable").forEach(row => {
+  row.addEventListener("click", () => {
+    row.classList.toggle("expanded");
+    document.querySelectorAll(`#scorecard tr.sub-row[data-group="${row.dataset.group}"]`)
+      .forEach(sr => sr.classList.toggle("open"));
+  });
+});
 </script>
 </body>
 </html>
