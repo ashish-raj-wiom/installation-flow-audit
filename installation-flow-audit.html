@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installation Flow Audit — CSP Response Bottleneck</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:          #f9f9f7;
+    --surface:       #fcfcfb;
+    --ink:           #0b0b0b;
+    --ink-2:         #52514e;
+    --muted:         #898781;
+    --grid:          #e1e0d9;
+    --border:        rgba(11,11,11,0.10);
+    --accent:        #2a78d6;   /* blue 450 */
+    --accent-track:  #cde2fb;   /* blue 100 */
+    --accent-soft:   #86b6ef;   /* blue 250 — ordinal light step */
+    --good:          #0ca30c;
+    --good-text:     #006300;
+    --warning:       #fab219;
+    --serious:       #ec835a;
+    --critical:      #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page:          #0d0d0d;
+      --surface:       #1a1a19;
+      --ink:           #ffffff;
+      --ink-2:         #c3c2b7;
+      --muted:         #898781;
+      --grid:          #2c2c2a;
+      --border:        rgba(255,255,255,0.10);
+      --accent:        #3987e5;
+      --accent-track:  #0d366b;
+      --accent-soft:   #86b6ef;
+      --good-text:     #0ca30c;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 28px 80px; }
+
+  /* ---------- header ---------- */
+  .eyebrow { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; margin: 6px 0 8px; }
+  .sub { color: var(--ink-2); max-width: 72ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .meta-chip {
+    font-size: 12px; color: var(--ink-2); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px;
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 52px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  h3 { font-size: 15px; font-weight: 650; margin: 22px 0 8px; }
+  .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+  .lede { color: var(--ink-2); max-width: 76ch; margin-bottom: 18px; }
+  p + p { margin-top: 10px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px;
+  }
+
+  /* ---------- hero + KPI ---------- */
+  .hero-grid { display: grid; grid-template-columns: 1.2fr 2fr; gap: 14px; margin-top: 18px; }
+  @media (max-width: 820px) { .hero-grid { grid-template-columns: 1fr; } }
+  .hero-num { font-size: 58px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+  .hero-label { font-size: 13px; color: var(--ink-2); margin-top: 6px; max-width: 34ch; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 560px) { .kpi-grid { grid-template-columns: 1fr; } }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .tile .t-label { font-size: 12px; color: var(--ink-2); }
+  .tile .t-value { font-size: 26px; font-weight: 650; margin-top: 2px; }
+  .tile .t-note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ---------- status chips ---------- */
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .chip.ok       { color: var(--good-text);  background: color-mix(in srgb, var(--good) 12%, var(--surface)); }
+  .chip.broken   { color: var(--critical);   background: color-mix(in srgb, var(--critical) 10%, var(--surface)); }
+  .chip.degraded { color: var(--serious);    background: color-mix(in srgb, var(--serious) 12%, var(--surface)); }
+  .chip.missing  { color: var(--muted);      background: color-mix(in srgb, var(--muted) 12%, var(--surface)); }
+  .chip.missing::before { background: transparent; border: 1.5px dashed var(--muted); width: 6px; height: 6px; }
+  .chip.info     { color: var(--ink-2);      background: color-mix(in srgb, var(--muted) 10%, var(--surface)); }
+
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; border-radius: 4px; padding: 1px 7px; border: 1px solid var(--border); color: var(--ink-2); }
+  .badge.l1 { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+
+  /* ---------- flow diagram ---------- */
+  .flow-scroll { overflow-x: auto; padding: 6px 2px 14px; }
+  .flow-strip { display: flex; align-items: stretch; gap: 0; min-width: 900px; }
+  .fstep {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; min-width: 118px; flex: 1;
+  }
+  .fstep .fs-name { font-size: 12.5px; font-weight: 650; line-height: 1.3; }
+  .fstep .fs-actor { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+  .farrow { align-self: center; color: var(--muted); padding: 0 6px; font-size: 15px; flex: 0 0 auto; }
+  .fstep.hot { border-color: color-mix(in srgb, var(--critical) 45%, transparent); }
+  .outcome-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  @media (max-width: 720px) { .outcome-grid { grid-template-columns: 1fr; } }
+  .outcome { border-radius: 10px; border: 1px solid var(--border); background: var(--surface); padding: 14px 16px; }
+  .outcome .o-title { font-weight: 650; font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+  .o-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+  .outcome .o-desc { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; }
+
+  .callout {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin-top: 16px;
+    font-size: 13.5px; color: var(--ink-2);
+  }
+  .callout strong { color: var(--ink); }
+  .callout.red { border-left-color: var(--critical); }
+
+  /* ---------- scorecard table ---------- */
+  .tbl-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th {
+    text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); font-weight: 650; padding: 12px 14px; border-bottom: 1px solid var(--grid);
+    background: var(--surface); white-space: nowrap;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--grid); vertical-align: middle; font-size: 13.5px; }
+  tr:last-child td { border-bottom: none; }
+  td .stage-name { font-weight: 600; }
+  td .formula { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 650; }
+  td .d1 { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+  .meter { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+  .meter .track { flex: 1; height: 9px; border-radius: 5px; background: var(--track-c, var(--accent-track)); overflow: hidden; }
+  .meter .fill { height: 100%; border-radius: 0 4px 4px 0; background: var(--fill-c, var(--accent)); }
+  .meter.na .track { background: repeating-linear-gradient(45deg, var(--grid), var(--grid) 4px, var(--surface) 4px, var(--surface) 8px); }
+
+  /* ---------- stacked bars ---------- */
+  .stack { display: flex; height: 44px; border-radius: 8px; overflow: hidden; margin-top: 14px; }
+  .seg { display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 650; min-width: 0; }
+  .seg + .seg { border-left: 2px solid var(--surface); }
+  .seg small { font-weight: 500; opacity: 0.9; margin-left: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 12.5px; color: var(--ink-2); }
+  .legend .key { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ---------- fix cards ---------- */
+  .fix { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 16px 20px; margin-top: 12px; }
+  .fix .f-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .fix .f-id { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--accent); }
+  .fix .f-title { font-weight: 650; font-size: 14.5px; }
+  .fix .f-body { color: var(--ink-2); font-size: 13.5px; margin-top: 6px; max-width: 88ch; }
+  .fix .f-body ul { margin: 6px 0 0 18px; }
+  .fix .f-body li { margin-top: 3px; }
+  .fix .f-evidence { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .fix .f-target { display: inline-block; font-size: 11.5px; color: var(--good-text); font-weight: 600; margin-top: 8px; }
+
+  /* ---------- sensitivity ---------- */
+  .sens td, .sens th { text-align: right; }
+  .sens td:first-child, .sens th:first-child { text-align: left; }
+  .sens .now { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+
+  .foot { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--grid); font-size: 12px; color: var(--muted); }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: color-mix(in srgb, var(--muted) 12%, var(--surface)); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HEADER ============ -->
+  <header>
+    <div class="eyebrow">Installation Flow · Leadership Audit</div>
+    <h1>Half of installation tasks die waiting for a CSP response</h1>
+    <p class="sub">A stage-by-stage audit of the booking → installation funnel: where tasks leak, why the biggest
+    leak is CSP unresponsiveness inside the P41 window, and the two tracks of fixes — reliable attention delivery
+    and response behavior — that close it.</p>
+    <div class="meta-row">
+      <span class="meta-chip">Prepared: July 15, 2026</span>
+      <span class="meta-chip">Source: Installation — Full Stages metrics sheet</span>
+      <span class="meta-chip">Owner: Ashish Raj</span>
+      <span class="meta-chip">Status: metric values being refreshed — gaps marked</span>
+    </div>
+  </header>
+
+  <!-- ============ TLDR ============ -->
+  <section>
+    <div class="kicker">The headline</div>
+    <h2>P41 timeout is the single biggest fall-off in the installation flow</h2>
+    <div class="hero-grid">
+      <div class="card">
+        <div class="hero-num" style="color: var(--critical);">49.4%</div>
+        <div class="hero-label">of all tasks created hit the <strong>P41 timeout</strong> — the CSP neither proposed a slot
+        nor declined within the 2-working-hour window, and the booking was pulled back and reallocated.</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="tile">
+          <div class="t-label">Task open rate</div>
+          <div class="t-value">84.3%</div>
+          <div class="t-note">CSPs do see most tasks (FPN + drilldown)</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">Response rate (of opened)</div>
+          <div class="t-value" style="color: var(--critical);">60%</div>
+          <div class="t-note">4 in 10 CSPs open the task and go silent</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">FPN delivery rate</div>
+          <div class="t-value" style="color: var(--critical);">64.6%</div>
+          <div class="t-note">System health metric — should be ~100%</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">Task attention rate</div>
+          <div class="t-value" style="color: var(--muted);">not measured</div>
+          <div class="t-note">Combined PN + FPN delivery — instrumentation gap</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout red">
+      <strong>The decomposition that matters:</strong> of the 49.4pp of tasks that time out, only
+      <strong>15.7pp never got opened</strong> (attention / delivery failure). The remaining
+      <strong>33.7pp were opened by the CSP, who then did nothing</strong>. Roughly <strong>two-thirds of the
+      timeout problem is behavioral</strong>, not notification plumbing — so fixing delivery alone cannot
+      solve this. Both tracks below are required.
+    </div>
+  </section>
+
+  <!-- ============ THE FLOW ============ -->
+  <section>
+    <div class="kicker">Context</div>
+    <h2>How a booking becomes an installation task</h2>
+    <p class="lede">When a booking is verified, the system creates a connection, finds the best CSP (DAS), and creates
+    an installation task (TAS). The CSP is then notified and must respond — propose a slot (happy case) or decline
+    (reallocation). If they do neither within <strong>P41 = 2 working hours</strong>, the booking is taken back and
+    sent to a different CSP.</p>
+
+    <div class="flow-scroll">
+      <div class="flow-strip">
+        <div class="fstep"><div class="fs-name">Booking Verified</div><div class="fs-actor">Customer</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">Connection Created + Requested</div><div class="fs-actor">System</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">CSP Assigned (DAS)</div><div class="fs-actor">System</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">Task Created (TAS)</div><div class="fs-actor">System</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">PN + FPN sent → delivered</div><div class="fs-actor">System · attention</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep"><div class="fs-name">Task Opened</div><div class="fs-actor">CSP</div></div>
+        <div class="farrow">→</div>
+        <div class="fstep hot"><div class="fs-name">Respond within P41 (2 wh)</div><div class="fs-actor">CSP · the bottleneck</div></div>
+      </div>
+    </div>
+
+    <div class="outcome-grid">
+      <div class="outcome">
+        <div class="o-title"><span class="o-dot" style="background: var(--good);"></span>Slot proposed — 42.5% of opened</div>
+        <div class="o-desc">The happy case. CSP proposes one slot between today and tomorrow; the install proceeds.</div>
+      </div>
+      <div class="outcome">
+        <div class="o-title"><span class="o-dot" style="background: var(--warning);"></span>Declined — 17.2% of opened</div>
+        <div class="o-desc">Explicit decline via the app. DAS immediately looks for another CSP; the declining CSP gets a 4-hour cooldown (P51). Fast, clean reallocation.</div>
+      </div>
+      <div class="outcome">
+        <div class="o-title"><span class="o-dot" style="background: var(--critical);"></span>Silence → P41 timeout — 49.4% of created</div>
+        <div class="o-desc">No slot, no decline. The customer waits the full 2 working hours before reallocation even begins. The dominant outcome today.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Attention mechanisms today:</strong> two channels try to get the CSP's attention — a standard
+      <strong>PN</strong> (push notification) and an <strong>FPN</strong> (full-page notification that takes over the
+      app screen). Both are sent to the CSP Manager, Manager+ and Owner during working hours; actions from
+      non-working hours are sent the next day. "Responded" = proposed a slot <em>or</em> declined — either beats a
+      timeout, because reallocation starts immediately instead of after 2 working hours.
+    </div>
+  </section>
+
+  <!-- ============ SCORECARD ============ -->
+  <section>
+    <div class="kicker">Stage-by-stage scorecard</div>
+    <h2>Where the funnel is healthy and where it leaks</h2>
+    <p class="lede"><span class="badge l1">L1</span>&nbsp; system-health metrics — pure plumbing, these should sit at
+    ~100%; anything lower is a defect to fix. &nbsp;<span class="badge">L2</span>&nbsp; workflow metrics — conversion
+    steps involving human action; these are moved by product and behavioral levers. Values marked
+    <span class="chip missing">missing</span> are instrumentation or reporting gaps being filled now.</p>
+
+    <div class="tbl-scroll">
+      <table id="scorecard">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Metric</th>
+            <th>Type</th>
+            <th style="min-width: 230px;">Value</th>
+            <th>D-1</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody><!-- rendered by script --></tbody>
+      </table>
+    </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Denominators differ by row (see formula under
+    each metric) — bars show each rate on its own 0–100% scale, not a shared funnel of counts. For the two
+    "lower-is-better" rows (decline, timeout) the bar length still shows the rate; the status chip carries the reading.</p>
+
+    <h3>Read of the scorecard</h3>
+    <p class="sub">Everything up to task creation is clean — connection creation, DAS assignment and TAS task creation
+    all run at 99.8–100%. The P41 timer itself is also healthy: 99.3% of eligible tasks correctly get timed out when
+    the window lapses, so enforcement is not the problem. The funnel breaks in exactly two places:
+    <strong>notification delivery</strong> (PN 83.9%, FPN 64.6% — both L1 metrics that should be ~100%) and
+    <strong>CSP response behavior</strong> (only 60% of CSPs who open a task act on it).</p>
+  </section>
+
+  <!-- ============ OUTCOMES ============ -->
+  <section>
+    <div class="kicker">Outcome mix</div>
+    <h2>Of every 100 tasks created</h2>
+    <p class="lede">Combining the stage rates: 84.3 of 100 tasks get opened; 60% of those get a response.
+    That yields the outcome mix below (numbers are per 100 tasks created; ~0.3 residual is rounding).</p>
+
+    <div class="card">
+      <div class="stack" aria-label="Outcome mix of 100 created tasks">
+        <div class="seg" style="width: 35.8%; background: var(--good); color: #fff;">Slot proposed<small>35.8</small></div>
+        <div class="seg" style="width: 14.5%; background: var(--warning); color: #0b0b0b;">Declined<small>14.5</small></div>
+        <div class="seg" style="width: 49.4%; background: var(--critical); color: #fff;">P41 timeout<small>49.4</small></div>
+      </div>
+      <div class="legend">
+        <span class="key"><span class="sw" style="background: var(--good);"></span>✓ Slot proposed (happy case)</span>
+        <span class="key"><span class="sw" style="background: var(--warning);"></span>↻ Declined (fast reallocation)</span>
+        <span class="key"><span class="sw" style="background: var(--critical);"></span>✕ P41 timeout (slow reallocation — customer waits 2 working hours)</span>
+      </div>
+
+      <h3>What the 49.4 timeouts are made of</h3>
+      <div class="stack" style="height: 38px;" aria-label="Timeout decomposition">
+        <div class="seg" style="width: 31.8%; background: var(--accent-soft); color: #0b0b0b;">Never opened<small>15.7 of 49.4</small></div>
+        <div class="seg" style="width: 68.2%; background: var(--accent); color: #fff;">Opened, then silent<small>33.7 of 49.4</small></div>
+      </div>
+      <div class="legend">
+        <span class="key"><span class="sw" style="background: var(--accent-soft);"></span>Attention failure — fix with Track A (delivery)</span>
+        <span class="key"><span class="sw" style="background: var(--accent);"></span>Behavioral failure — fix with Track B (response)</span>
+      </div>
+    </div>
+
+    <h3>What moves the needle — sensitivity</h3>
+    <p class="sub">Timeout rate ≈ 100% − (open rate × response rate). The response lever is worth roughly twice the
+    open lever from today's position:</p>
+    <div class="tbl-scroll" style="margin-top: 10px;">
+      <table class="sens">
+        <thead><tr><th>Scenario</th><th>Task open rate</th><th>Response rate</th><th>Implied P41 timeout</th></tr></thead>
+        <tbody>
+          <tr class="now"><td><strong>Today</strong></td><td>84.3%</td><td>60%</td><td><strong>49.4%</strong></td></tr>
+          <tr><td>Fix attention only (Track A)</td><td>95%</td><td>60%</td><td>43.0%</td></tr>
+          <tr><td>Fix behavior only (Track B)</td><td>84.3%</td><td>75%</td><td>36.8%</td></tr>
+          <tr><td>Both tracks</td><td>95%</td><td>75%</td><td>28.8%</td></tr>
+          <tr><td>Both tracks, stretch</td><td>95%</td><td>85%</td><td>19.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ TRACK A ============ -->
+  <section>
+    <div class="kicker">Fix track A · attention &amp; delivery (L1)</div>
+    <h2>Make sure every task reliably reaches the CSP</h2>
+    <p class="lede">Target: PN and FPN delivery back to ~100%-class health, and the missing Task Attention Rate
+    measured. This track caps the "never opened" third of timeouts (15.7pp).</p>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">A1</span><span class="f-title">Move notification triggering from CleverTap to Firebase direct</span></div>
+      <div class="f-body">Both delivery gaps (PN 83.9%, FPN 64.6%) share the same trigger path via CleverTap. Triggering
+      through Firebase directly removes an intermediary hop and its failure modes. Already identified as the fix in the
+      metrics sheet; needs an owner and a date.</div>
+      <div class="f-target">Targets: PN Delivery 83.9% → ~98% · FPN Delivery 64.6% → ~95%</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">A2</span><span class="f-title">Fix the FPN render pipeline's silent failures in the partner app</span></div>
+      <div class="f-body">A code-level audit of the partner app (Apr 2026, release 3.7.7) found four compounding bugs
+      where an FPN is delivered to the device but never rendered — each failing silently, with no event emitted:
+        <ul>
+          <li>a fixed 1.5s cold-start delay before invoking the FPN screen, while real cold start on mid-range devices is 3–4s;</li>
+          <li>if the app engine isn't ready at that moment, the code logs an error and gives up — no retry, no fallback;</li>
+          <li>the messaging service declares success if the app process is merely in the foreground — "process alive" ≠ "FPN rendered";</li>
+          <li>a payload parsing failure exits silently.</li>
+        </ul>
+      Fix: replace the fixed timer with an engine-ready callback, add retry + fallback when the engine isn't ready, and
+      only count success when the FPN screen confirms it rendered.</div>
+      <div class="f-evidence">Evidence: fpn_drop_analysis (Apr 2026) — bugs verified in <code>CustomFirebaseMessagingService.kt</code> / <code>MainActivity.kt</code> on master; re-verify against the current release before build.</div>
+      <div class="f-target">Targets: FPN delivered → rendered gap closed; every failure path emits a diagnostic event</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">A3</span><span class="f-title">Harden the FPN mechanism itself</span></div>
+      <div class="f-body">Promote the full-screen intent to the primary FPN channel (today it's a lower-tier fallback),
+      and add OEM-specific push SDKs for the device brands where background delivery is throttled (Xiaomi / OPPO are the
+      largest offenders in the delivery data).</div>
+      <div class="f-target">Target: FPN delivery resilient on aggressive-battery-management OEMs</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">A4</span><span class="f-title">Add a multi-channel fallback ladder for attention</span></div>
+      <div class="f-body">Today attention is a single shot: PN + FPN at task creation, fanned to Manager, Manager+ and
+      Owner. If none of those deliver or get opened within a defined window (e.g. 15–20 min), escalate automatically:
+        <ul>
+          <li>re-trigger PN + FPN;</li>
+          <li>then an automated IVR call to the CSP;</li>
+          <li>then SMS / WhatsApp with a deep link to the task;</li>
+        </ul>
+      Each rung fires only if the task is still unopened, so well-behaved CSPs never see the escalation.</div>
+      <div class="f-target">Target: Task Open Rate 84.3% → 95%+</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">A5</span><span class="f-title">Instrument the Task Attention Rate (currently unmeasured)</span></div>
+      <div class="f-body">The combined "did anything reach any of the three recipients" metric is blank in the scorecard —
+      we cannot manage what we don't measure. Define it as: tasks where ≥1 of {PN, FPN} delivered to ≥1 recipient ÷ tasks
+      created, and add per-channel delivery telemetry at every failure point found in A2.</div>
+      <div class="f-target">Target: Task Attention Rate on the dashboard, daily, with D-1 comparison</div>
+    </div>
+  </section>
+
+  <!-- ============ TRACK B ============ -->
+  <section>
+    <div class="kicker">Fix track B · response behavior (L2)</div>
+    <h2>Convert attention into a response</h2>
+    <p class="lede">The bigger lever: 33.7 of every 100 tasks are opened and then abandoned. These CSPs saw the task.
+    The fixes below make the deadline visible, make declining cheap, and make silence costly.</p>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">B1</span><span class="f-title">Show the P41 deadline as a live countdown</span></div>
+      <div class="f-body">Today the 2-working-hour window is invisible to the CSP — nothing in the task or home feed says
+      "this booking leaves you in 1h 40m." Add a live countdown on the home feed and task card, computed from the actual
+      working-hours-projected P41 fire time (so an evening task correctly shows tomorrow-morning expiry, not a naive
+      2-hour clock). A deadline that can be seen is a deadline that changes behavior.</div>
+      <div class="f-evidence">The reallocation trigger time already exists in the scheduler; what's new is exposing it to the app (specced in SCHED-01).</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">B2</span><span class="f-title">Escalating nudge cascade inside the P41 window</span></div>
+      <div class="f-body">A slot-proposal urgency nudge already fires at 1 hour and bumps the task's attention state.
+      Extend it into a cascade: nudge at 1h → countdown intensifies → final warning to Manager+ and Owner shortly before
+      expiry ("this booking will be reassigned in 20 minutes"). Every fire is logged, so we can measure which rung
+      actually converts.</div>
+      <div class="f-target">Target: Response Rate 60% → 75%</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">B3</span><span class="f-title">Make declining explicit and low-friction</span></div>
+      <div class="f-body">Timeouts outnumber declines ~3:1 (49.4% vs 17.2% of opens). For many CSPs, silence is just the
+      lazy decline — and it costs the customer 2 working hours of waiting versus minutes for an explicit decline. Put a
+      prominent "Can't take this" action with a mandatory structured reason (too far / no capacity / slot conflict) on
+      the task. Every converted silent-timeout → explicit-decline is a directly faster reallocation <em>and</em> gives us
+      the reason data we currently don't have.</div>
+      <div class="f-target">Target: shift 10–15pp from timeout into decline; reallocation latency drops from 2 working hours to minutes for that share</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">B4</span><span class="f-title">Make silence visibly costly — consequence symmetry</span></div>
+      <div class="f-body">The system already scores a P41 timeout like a decline pattern (cooldown P51, assignment
+      counters) — but the CSP never sees this. Surface it: show timeout counts on the CSP's own quality view, and feed
+      responsiveness into allocation priority so fast responders demonstrably get more bookings. Behavior follows what's
+      measured <em>and shown</em>.</div>
+    </div>
+
+    <div class="fix">
+      <div class="f-head"><span class="f-id">B5</span><span class="f-title">Find out why opened tasks are abandoned</span></div>
+      <div class="f-body">33.7pp is too large to fix blind. Two quick studies: (1) segment the open-but-silent cohort by
+      CSP, geography, time-of-day and task age — is this concentrated in a few chronically unresponsive CSPs or spread
+      thin? (2) call 20–30 CSPs who opened and didn't respond within a day of the event and ask why. The structured
+      decline reasons from B3 then keep this signal flowing permanently.</div>
+    </div>
+  </section>
+
+  <!-- ============ GAPS + ASKS ============ -->
+  <section>
+    <div class="kicker">Data gaps &amp; asks</div>
+    <h2>What we still can't see</h2>
+    <div class="card">
+      <ul style="margin-left: 18px; color: var(--ink-2);">
+        <li><strong>Task Attention Rate</strong> — the combined delivery metric is not instrumented (fix A5).</li>
+        <li><strong>D-1 values</strong> for PN/FPN delivery, open, response, decline, timeout and slot-proposed rates — day-over-day trend view is incomplete in the source sheet; being backfilled.</li>
+        <li><strong>Decline/abandon reasons</strong> — no structured reason data exists for either declines or silent timeouts (fix B3).</li>
+        <li><strong>Per-recipient delivery split</strong> — PN/FPN delivery is not broken down by Manager vs Manager+ vs Owner, so we don't know if any recipient reliably receives anything.</li>
+      </ul>
+      <p style="margin-top: 12px; color: var(--ink-2);"><strong>Asks from this review:</strong> (1) prioritize the
+      Firebase migration (A1) and FPN render fixes (A2) with app-release owners; (2) approve the countdown + nudge
+      cascade (B1/B2) for the next sprint; (3) sponsor the abandonment study (B5) so Track B targets are grounded in
+      reasons, not guesses.</p>
+    </div>
+  </section>
+
+  <!-- ============ APPENDIX ============ -->
+  <section>
+    <div class="kicker">Appendix</div>
+    <h2>Metric definitions</h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Metric</th><th>Formula</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr><td># Bookings Verified</td><td>count of bookings verified</td><td>L2</td></tr>
+          <tr><td>Connection Creation Rate</td><td># Connections Created ÷ # Bookings</td><td>L1</td></tr>
+          <tr><td>Connection Requested Rate</td><td># Connections Requested ÷ # Connections Created</td><td>L1</td></tr>
+          <tr><td>Connection Assigned Rate</td><td># Connections Assigned (DAS) ÷ # Connections Requested</td><td>L1</td></tr>
+          <tr><td>Task Creation Rate</td><td># Tasks Created ÷ # Connections Allocated</td><td>L1</td></tr>
+          <tr><td>Install PN Sent Rate</td><td>PN Sent ÷ Tasks Created</td><td>L1</td></tr>
+          <tr><td>Install PN Delivery Rate</td><td>PN Delivered ÷ PN Sent</td><td>L1</td></tr>
+          <tr><td>FPN Sent Rate</td><td>FPN Sent ÷ Tasks Created</td><td>L1</td></tr>
+          <tr><td>FPN Delivery Rate</td><td>FPN Delivered ÷ FPN Sent</td><td>L1</td></tr>
+          <tr><td>Task Attention Rate</td><td>Combined (PN + FPN) delivery ÷ Tasks Created</td><td>L1</td></tr>
+          <tr><td>Task Open Rate</td><td>(FPN opened + drilldown opened) ÷ Tasks Created</td><td>L2</td></tr>
+          <tr><td>Response Rate</td><td>Responded (slot proposed or declined) ÷ Tasks Opened</td><td>L2</td></tr>
+          <tr><td>Task Decline Rate</td><td>Declined ÷ Tasks Opened</td><td>L2</td></tr>
+          <tr><td>Slot Proposed Rate</td><td>Slot Proposed ÷ Tasks Opened</td><td>L2</td></tr>
+          <tr><td>P41 Timeout Rate (workflow)</td><td>P41 Timeouts ÷ Tasks Created</td><td>L2</td></tr>
+          <tr><td>P41 Timeout Rate (timer health)</td><td>P41 Timeout Hit ÷ Tasks Eligible</td><td>L1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 12.5px; color: var(--muted); margin-top: 10px;">Parameter glossary: <strong>P41</strong> — the
+    2-working-hour slot-proposal window after task creation; on expiry the booking is reallocated.
+    <strong>P51</strong> — the 4-hour cooldown applied to a CSP after a decline (also applied on timeout).
+    Working hours: notifications and timers accrue only during business hours; non-working-hour actions roll to the
+    next day.</p>
+  </section>
+
+  <div class="foot">
+    Installation Flow Leadership Audit · prepared by Ashish Raj · data from the Installation — Full Stages metrics sheet
+    (Value column; D-1 where available). Metric values are point-in-time and being refreshed — rows marked
+    <em>missing</em> will be updated as data lands. Technical evidence: FPN pipeline audit (Apr 2026), install-flow
+    scheduler audit (Jul 2026).
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   METRIC VALUES — edit this block only.
+   value: number (percent) or null  → null renders as "missing"
+   d1:    number or null
+   status: 'ok' | 'degraded' | 'broken' | 'missing' | 'info'
+   ========================================================================= */
+const STAGES = [
+  { stage: "Booking Confirmed / Verified", metric: "# Bookings Verified",        formula: "# Bookings Verified",                    type: "L2", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { stage: "Connection Created",           metric: "Connection Creation Rate",   formula: "Connections Created ÷ Bookings",         type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { stage: "Connection Requested",         metric: "Connection Requested Rate",  formula: "Requested ÷ Created",                    type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { stage: "Connection Assigned (DAS)",    metric: "Connection Assigned Rate",   formula: "Assigned ÷ Requested",                   type: "L1", value: 99.9, d1: 99.6, status: "ok",       label: "OK — zones-table fix in progress" },
+  { stage: "Task Created (TAS)",           metric: "Task Creation Rate",         formula: "Tasks Created ÷ Connections Allocated",  type: "L1", value: 99.8, d1: 100,  status: "ok",       label: "OK" },
+  { stage: "PN Sent",                      metric: "Install PN Sent Rate",       formula: "PN Sent ÷ Tasks Created",                type: "L1", value: 100,  d1: 100,  status: "ok",       label: "OK" },
+  { stage: "PN Delivered",                 metric: "Install PN Delivery Rate",   formula: "PN Delivered ÷ PN Sent",                 type: "L1", value: 83.9, d1: null, status: "degraded", label: "Broken — fix A1" },
+  { stage: "FPN Sent",                     metric: "FPN Sent Rate",              formula: "FPN Sent ÷ Tasks Created",               type: "L1", value: 100,  d1: null, status: "ok",       label: "OK" },
+  { stage: "FPN Delivered",                metric: "FPN Delivery Rate",          formula: "FPN Delivered ÷ FPN Sent",               type: "L1", value: 64.6, d1: null, status: "broken",   label: "Broken — fixes A1–A3" },
+  { stage: "Task Attention (combined)",    metric: "Task Attention Rate",        formula: "Combined delivery ÷ Tasks Created",      type: "L1", value: null, d1: null, status: "missing",  label: "Not measured — fix A5" },
+  { stage: "Task Opened",                  metric: "Task Open Rate",             formula: "(FPN + drilldown opened) ÷ Tasks Created", type: "L2", value: 84.3, d1: null, status: "info",   label: "15.7% never opened — fix A4" },
+  { stage: "Response Provided",            metric: "Response Rate",              formula: "Responded ÷ Tasks Opened",               type: "L2", value: 60,   d1: null, status: "broken",   label: "Core leak — Track B" },
+  { stage: "Task Declined",                metric: "Task Decline Rate",          formula: "Declined ÷ Tasks Opened",                type: "L2", value: 17.2, d1: null, status: "info",     label: "Reallocation (P51 cooldown)" },
+  { stage: "Slot Proposed",                metric: "Slot Proposed Rate",         formula: "Slot Proposed ÷ Tasks Opened",           type: "L2", value: 42.5, d1: null, status: "info",     label: "Happy case" },
+  { stage: "P41 Timeout (workflow)",       metric: "P41 Timeout Rate",           formula: "P41 Timeouts ÷ Tasks Created",           type: "L2", value: 49.4, d1: null, status: "broken",   label: "THE problem — both tracks", invert: true },
+  { stage: "P41 Timer (system health)",    metric: "P41 Timeout Hit Rate",       formula: "Timeout Hit ÷ Tasks Eligible",           type: "L1", value: 99.3, d1: null, status: "ok",       label: "Timer enforcement works" },
+];
+
+const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--critical)", info: "var(--accent)", missing: "transparent" };
+const CHIP = { ok: "ok", degraded: "degraded", broken: "broken", info: "info", missing: "missing" };
+
+const tbody = document.querySelector("#scorecard tbody");
+tbody.innerHTML = STAGES.map(s => {
+  const isMissing = s.value === null || s.value === undefined;
+  const val = isMissing ? "missing" : s.value + "%";
+  const d1 = (s.d1 === null || s.d1 === undefined) ? "—" : s.d1 + "%";
+  const meter = isMissing
+    ? `<div class="meter na"><div class="track"></div><span style="color: var(--muted); font-size: 12.5px; font-weight: 600;">missing</span></div>`
+    : `<div class="meter" style="--fill-c: ${FILL[s.status]}; --track-c: color-mix(in srgb, ${FILL[s.status]} 16%, var(--surface));">
+         <div class="track"><div class="fill" style="width: ${Math.min(s.value, 100)}%;"></div></div>
+         <span class="num" style="font-variant-numeric: tabular-nums; font-weight: 650; min-width: 52px; text-align: right;">${s.value}%</span>
+       </div>`;
+  return `<tr>
+    <td><div class="stage-name">${s.stage}</div></td>
+    <td><div>${s.metric}</div><div class="formula">${s.formula}</div></td>
+    <td><span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span></td>
+    <td>${meter}</td>
+    <td class="num"><span class="d1">${d1}</span></td>
+    <td><span class="chip ${CHIP[s.status]}">${s.label}</span></td>
+  </tr>`;
+}).join("");
+</script>
+</body>
+</html>
