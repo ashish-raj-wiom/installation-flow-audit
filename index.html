@@ -140,7 +140,7 @@
   <!-- ============ HEADER ============ -->
   <header>
     <div class="eyebrow">Installation Flow · Leadership Audit</div>
-    <h1>Half of installation tasks die waiting for a CSP response</h1>
+    <h1>More than half of installation tasks die waiting for a CSP response</h1>
     <p class="sub">Stage-by-stage health of the booking → installation funnel, the interventions in flight, and their
     deadlines. System metrics (L1) should sit at ~100%; workflow metrics (L2) are moved by product and behavior.</p>
     <div class="meta-row">
@@ -153,10 +153,10 @@
   <!-- ============ HEADLINE ============ -->
   <section>
     <div class="kicker">The headline</div>
-    <h2>53% of tasks time out because the CSP never responds</h2>
+    <h2>54.5% of tasks time out because the CSP never responds</h2>
     <div class="hero-grid">
       <div class="card">
-        <div class="hero-num" style="color: var(--critical);">53.2%</div>
+        <div class="hero-num" style="color: var(--critical);">54.5%</div>
         <div class="hero-label">of all tasks created ended <strong>unresponsive</strong> — the CSP neither proposed a
         slot nor declined within the 2-working-hour response window, and the booking had to be reassigned. The single
         biggest fall-off in the flow.</div>
@@ -185,8 +185,8 @@
       </div>
     </div>
     <div class="callout red">
-      <strong>The split that matters:</strong> of the 53.2% that go unresponsive, only <strong>15.1pp never saw the
-      task</strong>. The other <strong>38.1pp opened it and still did nothing</strong> — roughly
+      <strong>The split that matters:</strong> of the 54.5% that go unresponsive, only <strong>15.1pp never saw the
+      task</strong>. The other <strong>39.4pp opened it and still did nothing</strong> — roughly
       <strong>7 in 10 unresponsive tasks are a behavior problem</strong>, not a notification problem. Fixing delivery
       alone cannot close this; both delivery and response interventions below are needed.
     </div>
@@ -257,7 +257,7 @@
       <div class="stack" aria-label="Outcome mix of 100 created tasks">
         <div class="seg" style="width: 32.4%; background: var(--good); color: #fff;">Slot proposed<small>32.4</small></div>
         <div class="seg" style="width: 13.2%; background: var(--warning); color: #0b0b0b;">Declined<small>13.2</small></div>
-        <div class="seg" style="width: 53.2%; background: var(--critical); color: #fff;">Unresponsive<small>53.2</small></div>
+        <div class="seg" style="width: 54.5%; background: var(--critical); color: #fff;">Unresponsive<small>54.5</small></div>
       </div>
       <div class="legend">
         <span class="key"><span class="sw" style="background: var(--good);"></span>✓ Slot proposed — install proceeds</span>
@@ -265,10 +265,10 @@
         <span class="key"><span class="sw" style="background: var(--critical);"></span>✕ Unresponsive — customer waits 2 working hours, then reassignment</span>
       </div>
 
-      <h3>What the 53.2 unresponsive tasks are made of</h3>
+      <h3>What the 54.5 unresponsive tasks are made of</h3>
       <div class="stack" style="height: 38px;" aria-label="Unresponsive decomposition">
-        <div class="seg" style="width: 28.4%; background: var(--accent-soft); color: #0b0b0b;">Never opened<small>15.1</small></div>
-        <div class="seg" style="width: 71.6%; background: var(--accent); color: #fff;">Opened, then silent<small>38.1</small></div>
+        <div class="seg" style="width: 27.7%; background: var(--accent-soft); color: #0b0b0b;">Never opened<small>15.1</small></div>
+        <div class="seg" style="width: 72.3%; background: var(--accent); color: #fff;">Opened, then silent<small>39.4</small></div>
       </div>
       <div class="legend">
         <span class="key"><span class="sw" style="background: var(--accent-soft);"></span>Delivery problem — fixed by the Firebase + overlay interventions</span>
@@ -314,7 +314,7 @@ const ROWS = [
   { sub: true, stage: "Slot Proposed Rate", formula: "Slot proposed ÷ Tasks opened",                  type: "L2", value: 38.2, status: "info",     ivn: "", dl: "" },
   { sub: true, stage: "Task Decline Rate", formula: "Declined ÷ Tasks opened",                        type: "L2", value: 15.6, status: "info",     ivn: "", dl: "" },
 
-  { stage: "Unresponsive Rate",            formula: "No response within P41 (2 working hours) ÷ Tasks created", type: "L2", value: 53.2, status: "broken", ivn: "", dl: "" },
+  { stage: "Unresponsive Rate",            formula: "No response within P41 (2 working hours) ÷ Tasks created", type: "L2", value: 54.5, status: "broken", ivn: "", dl: "" },
   { sub: true, stage: "P41 Hit Rate",      formula: "P41 timeout triggered ÷ Tasks eligible — every unresponsive task is closed by the P41 timer", type: "L1", value: 100, status: "ok", ivn: "", dl: "" },
 ];
 
