@@ -293,20 +293,20 @@ const ROWS = [
   { sub: true, stage: "PN Sent Rate",      formula: "Push notifications sent ÷ Tasks created",        type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { sub: true, stage: "FPN Sent Rate",     formula: "Full-page notifications sent ÷ Tasks created",   type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
 
-  { stage: "Task Attention Rate",          formula: "Any notification delivered ÷ Tasks created",     type: "L1", value: 89.4, status: "degraded", ivn: "Add overlays in addition to PN and FPN", dl: "22 Jul" },
+  { stage: "Task Attention Rate",          formula: "Any notification delivered ÷ Notifications sent", type: "L1", value: 89.4, status: "degraded", ivn: "Add overlays in addition to PN and FPN", dl: "22 Jul" },
   { sub: true, stage: "PN Delivery Rate",  formula: "PN delivered ÷ PN sent",                         type: "L1", value: 89.4, status: "degraded", ivn: "Move to Firebase (from CleverTap) to improve delivery", dl: "21 Jul" },
   { sub: true, stage: "FPN Delivery Rate", formula: "FPN delivered ÷ FPN sent",                       type: "L1", value: 70,   status: "broken",   ivn: "", dl: "" },
 
   { stage: "Task Open Rate",               formula: "Task seen by CSP (FPN or in-app) ÷ Tasks created", type: "L2", value: 84.9, status: "info",   ivn: "", dl: "" },
-  { sub: true, stage: "FPN Page Open Rate", formula: "Opened via full-page notification ÷ Tasks created", type: "L2", value: null, status: "missing", ivn: "", dl: "" },
+  { sub: true, stage: "FPN Page Open Rate", formula: "= FPN Delivery Rate — a delivered FPN opens the task full-screen", type: "L2", value: 70, status: "info", ivn: "", dl: "" },
   { sub: true, stage: "Task Drilldown Open Rate", formula: "Opened via in-app task page ÷ Tasks created", type: "L2", value: 64,  status: "info",  ivn: "", dl: "" },
 
   { stage: "Response Rate",                formula: "Slot proposed or declined ÷ Tasks opened",       type: "L2", value: 53.8, status: "broken",   ivn: "Enrichment of decline reasons", dl: "17 Jul" },
   { sub: true, stage: "Slot Proposed Rate", formula: "Slot proposed ÷ Tasks opened",                  type: "L2", value: 38.2, status: "info",     ivn: "", dl: "" },
   { sub: true, stage: "Task Decline Rate", formula: "Declined ÷ Tasks opened",                        type: "L2", value: 15.6, status: "info",     ivn: "", dl: "" },
 
-  { stage: "Unresponsive Rate",            formula: "No response within 2 working hours ÷ Tasks created", type: "L2", value: 53.2, status: "broken", ivn: "", dl: "" },
-  { stage: "P41 Timeout Rate",             formula: "Timeout correctly triggered ÷ Tasks eligible",   type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
+  { stage: "Unresponsive Rate",            formula: "No response within P41 (2 working hours) ÷ Tasks created", type: "L2", value: 53.2, status: "broken", ivn: "", dl: "" },
+  { sub: true, stage: "P41 Hit Rate",      formula: "P41 timeout triggered ÷ Tasks eligible — every unresponsive task is closed by the P41 timer", type: "L1", value: 100, status: "ok", ivn: "", dl: "" },
 ];
 
 const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--critical)", info: "var(--accent)", missing: "transparent" };
