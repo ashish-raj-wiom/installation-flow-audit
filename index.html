@@ -163,7 +163,7 @@
       </div>
       <div class="kpi-grid">
         <div class="tile">
-          <div class="t-label">Task attention rate</div>
+          <div class="t-label">Task reach rate</div>
           <div class="t-value">89.4%</div>
           <div class="t-note">Notification actually reached the CSP's phone</div>
         </div>
@@ -211,7 +211,7 @@
         <div class="farrow">→</div>
         <div class="fstep"><div class="fs-name">Notification Sent</div><div class="fs-actor">System · PN + FPN</div></div>
         <div class="farrow">→</div>
-        <div class="fstep"><div class="fs-name">Task Attention</div><div class="fs-actor">System · delivered</div></div>
+        <div class="fstep"><div class="fs-name">Task Reached</div><div class="fs-actor">System · delivered</div></div>
         <div class="farrow">→</div>
         <div class="fstep"><div class="fs-name">Task Opened</div><div class="fs-actor">CSP</div></div>
         <div class="farrow">→</div>
@@ -302,7 +302,7 @@ const ROWS = [
   { sub: true, stage: "PN Sent Rate",      formula: "Push notifications sent ÷ Tasks created",        type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { sub: true, stage: "FPN Sent Rate",     formula: "Full-page notifications sent ÷ Tasks created",   type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
 
-  { stage: "Task Attention Rate",          formula: "Any notification delivered ÷ Notifications sent", type: "L1", value: 89.4, status: "degraded", ivn: "Add overlays in addition to PN and FPN", dl: "22 Jul" },
+  { stage: "Task Reach Rate",              formula: "Any notification delivered ÷ Notifications sent", type: "L1", value: 89.4, status: "degraded", ivn: "Add overlays in addition to PN and FPN", dl: "22 Jul" },
   { sub: true, stage: "PN Delivery Rate",  formula: "PN delivered ÷ PN sent",                         type: "L1", value: 89.4, status: "degraded", ivn: "Move to Firebase (from CleverTap) to improve delivery", dl: "21 Jul" },
   { sub: true, stage: "FPN Delivery Rate", formula: "FPN delivered ÷ FPN sent",                       type: "L1", value: 70,   status: "broken",   ivn: "", dl: "" },
 
