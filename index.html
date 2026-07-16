@@ -295,7 +295,7 @@ const ROWS = [
   { stage: "# Bookings Verified",          formula: "Bookings verified",                              type: "",   value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Creation Rate",     formula: "Connections created ÷ Bookings",                 type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Requested Rate",    formula: "Connections requested ÷ Connections created",    type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
-  { stage: "Connection Assigned Rate",     formula: "CSP assigned ÷ Connections requested",           type: "L1", value: 99.6, status: "ok",       ivn: "", dl: "" },
+  { stage: "Connection Assigned Rate",     formula: "CSP assigned ÷ Connections requested",           type: "L1", value: 99.6, status: "ok",       ivn: "Bug: booking service is not giving the partners list to CSP World — fix TBD", dl: "TBD" },
   { stage: "Task Creation Rate",           formula: "Tasks created ÷ Connections assigned",           type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
 
   { stage: "Notification Sent Rate",       formula: "PN + FPN sent ÷ Tasks created",                  type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
@@ -438,10 +438,12 @@ const ROADMAP = [
     type: "Bug", metric: "—", mtype: "", status: "Coming", date: "21 Jul" },
   { item: "Educating the CSP to decline if the booking is not suitable",
     type: "Gap", metric: "Response Rate / Decline Rate", mtype: "L2", status: "Coming", date: "TBD" },
+  { item: "Booking service is not giving the partners list to CSP World",
+    type: "Bug", metric: "Connection Assigned Rate", mtype: "L1", status: "Fix TBD", date: "TBD" },
 ];
 
 const TCHIP = { "Bug": "bug", "Gap": "improvement", "Improvement": "improvement", "Parameter change": "parameter" };
-const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Scoping": "spec", "Planned": "spec", "Spec ready": "spec", "RCA done": "rca" };
+const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Scoping": "spec", "Planned": "spec", "Spec ready": "spec", "Fix TBD": "spec", "RCA done": "rca" };
 
 document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map(r => `<tr>
   <td class="num">${r.date}</td>
