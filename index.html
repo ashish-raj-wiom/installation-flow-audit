@@ -112,6 +112,11 @@
   .sub-count { font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 6px; }
   tr.sub-row { display: none; }
   tr.sub-row.open { display: table-row; }
+  tr.dim td { opacity: 0.55; }
+  tr.divider-row td {
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface)); color: var(--ink-2);
+    font-size: 11.5px; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 14px;
+  }
   tr.sub-row td { border-bottom-color: color-mix(in srgb, var(--grid) 55%, var(--surface)); }
   tr.sub-row td:first-child { padding-left: 46px; }
   tr.sub-row .stage-name { font-weight: 500; color: var(--ink-2); font-size: 13px; }
@@ -304,12 +309,43 @@ const ROWS = [
 
   { stage: "Unresponsive Rate",            formula: "No response within P41 (2 working hours) ÷ Tasks created", type: "L2", value: 54.5, status: "broken", ivn: "", dl: "" },
   { sub: true, stage: "P41 Hit Rate",      formula: "P41 timeout triggered ÷ Tasks eligible — every unresponsive task is closed by the P41 timer", type: "L1", value: 100, status: "ok", ivn: "", dl: "" },
+
+  { divider: "Today's discussion ends here — post-response funnel below, included for completeness" },
+
+  { dim: true, stage: "DAS Acceptance Rate",       formula: "DAS accepted ÷ Slots proposed",                        type: "L1", value: 100,   status: "ok",       ivn: "", dl: "" },
+  { dim: true, stage: "Slot Confirmed Rate",       formula: "Slot confirmed by customer ÷ Slots proposed",          type: "L2", value: 51.8,  status: "info",     ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Slot Confirmation PN Sent Rate",     formula: "PN to customer ÷ Slots proposed (immediate and +4h)", type: "L1", value: 83.94, status: "degraded", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Slot Confirmation PN Delivery Rate", formula: "PN delivered ÷ PN sent",                              type: "L1", value: 91.95, status: "degraded", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Slot Confirmation IVR Call Rate",    formula: "Tasks with ≥1 IVR call ÷ Tasks eligible (fallback at 10m–6h if unconfirmed)", type: "L1", value: 86.2, status: "degraded", ivn: "", dl: "" },
+  { dim: true, stage: "Technician Assignment Rate", formula: "Technician assigned ÷ Slots confirmed",                type: "L2", value: 80,    status: "info",     ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Slot Confirmed PN Sent Rate",     formula: "PN to CSP after customer confirms ÷ Slots confirmed",  type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Slot Confirmed PN Delivery Rate", formula: "PN delivered ÷ PN sent (working hours 9–9)",           type: "L1", value: 84.6, status: "degraded", ivn: "", dl: "" },
+  { dim: true, stage: "Technician Arrival Rate",   formula: "Technician arrived ÷ Technicians assigned",            type: "L2", value: 37,    status: "info",     ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Technician PN Sent Rate",     formula: "PN to technician ÷ Technicians assigned",  type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Technician PN Delivery Rate", formula: "Technician PN delivered ÷ PN sent",        type: "L1", value: 34.3, status: "broken",   ivn: "", dl: "" },
+  { dim: true, stage: "Connection Active Rate",    formula: "Connection active ÷ Happy code entered — end of the on-site flow", type: "L1", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Selfie Submitted Rate",       formula: "Selfie submitted ÷ Technician arrived",    type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Aadhar Submitted Rate",       formula: "Aadhar submitted ÷ Selfie submitted",      type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "SD Fee Submitted Rate",       formula: "Fee submitted ÷ Aadhar submitted",         type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "ISP Account Creation Rate",   formula: "ISP account created ÷ Fee submitted",      type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Device ID Entry Rate",        formula: "Device ID entered ÷ ISP account created",  type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Device Photo Entry Rate",     formula: "Device photo ÷ Device ID entered",         type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Configuration Rate",          formula: "Configuration set ÷ Device photo (5m + 2m timers, unlimited attempts)", type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Speed Test Rate",             formula: "Speed test ÷ Device photo",                type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Happy Code Received Rate",    formula: "Happy code received ÷ Speed test",         type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "Happy Code Entered Rate",     formula: "Happy code entered ÷ Happy code received", type: "L2", value: 100, status: "ok", ivn: "", dl: "" },
+  { dim: true, stage: "Install Fail Reported Rate", formula: "CSP reported \"can't install\" after slot proposal ÷ Tasks created — reallocated", type: "L2", value: 3, status: "info", ivn: "", dl: "" },
+  { dim: true, stage: "Task Cancelled Rate (Cx Cancellation)",  formula: "Cancelled by customer ÷ Tasks created",    type: "L2", value: 6,    status: "info", ivn: "", dl: "" },
+  { dim: true, stage: "Task Cancelled Rate (Cx Backend)",       formula: "Cancelled by customer backend ÷ Total bookings (no slot in 7d / no install in 7d after arrival / auto-cancel at 14d)", type: "L2", value: 68.2, status: "info", ivn: "", dl: "" },
+  { dim: true, stage: "P74 Timeout Rate",  formula: "P74 timeouts ÷ Tasks with slot proposed — P74: 72h (12 Jun) → 80h (3 Jul) → 96h (9 Jul). Prior cohorts; 14 Jul tasks can't have hit P74 yet", type: "L2", value: 17.5, status: "info", ivn: "", dl: "" },
+  { dim: true, sub: true, stage: "P74 Hit Rate", formula: "P74 timeout hit ÷ Tasks eligible",           type: "L1", value: 98.1, status: "ok", ivn: "", dl: "" },
 ];
 
 const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--critical)", info: "var(--accent)", missing: "transparent" };
 
 let groupId = -1;
 document.querySelector("#scorecard tbody").innerHTML = ROWS.map((s, i) => {
+  if (s.divider) return `<tr class="divider-row"><td colspan="6">${s.divider}</td></tr>`;
   if (!s.sub) groupId++;
   const hasSubs = !s.sub && ROWS[i + 1] && ROWS[i + 1].sub;
   const subCount = hasSubs ? ROWS.slice(i + 1).findIndex(r => !r.sub) === -1
@@ -325,7 +361,7 @@ document.querySelector("#scorecard tbody").innerHTML = ROWS.map((s, i) => {
        </div>`;
   const caret = hasSubs ? `<span class="caret">▸</span>` : (s.sub ? "" : `<span class="caret"></span>`);
   const count = hasSubs ? `<span class="sub-count">${subCount} component${subCount > 1 ? "s" : ""}</span>` : "";
-  return `<tr class="${s.sub ? "sub-row" : "main-row"}${hasSubs ? " expandable" : ""}" data-group="${groupId}">
+  return `<tr class="${s.sub ? "sub-row" : "main-row"}${hasSubs ? " expandable" : ""}${s.dim ? " dim" : ""}" data-group="${groupId}">
     <td><div class="stage-name">${caret}${s.stage}${count}</div></td>
     <td><div class="formula" style="font-size: 12.5px;">${s.formula}</div></td>
     <td>${s.type ? `<span class="badge ${s.type === "L1" ? "l1" : ""}">${s.type}</span>` : ""}</td>
