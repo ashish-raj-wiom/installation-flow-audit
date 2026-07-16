@@ -113,10 +113,17 @@
   tr.sub-row { display: none; }
   tr.sub-row.open { display: table-row; }
   tr.dim td { opacity: 0.55; }
+  tr.main-row.dim { display: none; }
+  tr.main-row.dim.section-open { display: table-row; }
+  tr.divider-row { cursor: pointer; }
   tr.divider-row td {
     background: color-mix(in srgb, var(--accent) 7%, var(--surface)); color: var(--ink-2);
     font-size: 11.5px; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 14px;
   }
+  tr.divider-row:hover td { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+  tr.divider-row .caret { display: inline-block; width: 14px; font-size: 11px; transition: transform 0.15s; }
+  tr.divider-row.open .caret { transform: rotate(90deg); }
+  tr.divider-row .hint { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); margin-left: 8px; }
   tr.sub-row td { border-bottom-color: color-mix(in srgb, var(--grid) 55%, var(--surface)); }
   tr.sub-row td:first-child { padding-left: 46px; }
   tr.sub-row .stage-name { font-weight: 500; color: var(--ink-2); font-size: 13px; }
@@ -310,7 +317,7 @@ const ROWS = [
   { stage: "Unresponsive Rate",            formula: "No response within P41 (2 working hours) ÷ Tasks created", type: "L2", value: 54.5, status: "broken", ivn: "", dl: "" },
   { sub: true, stage: "P41 Hit Rate",      formula: "P41 timeout triggered ÷ Tasks eligible — every unresponsive task is closed by the P41 timer", type: "L1", value: 100, status: "ok", ivn: "", dl: "" },
 
-  { divider: "Today's discussion ends here — post-response funnel below, included for completeness" },
+  { divider: "Other Metrics" },
 
   { dim: true, stage: "DAS Acceptance Rate",       formula: "DAS accepted ÷ Slots proposed",                        type: "L1", value: 100,   status: "ok",       ivn: "", dl: "" },
   { dim: true, stage: "Slot Confirmed Rate",       formula: "Slot confirmed by customer ÷ Slots proposed",          type: "L2", value: 51.8,  status: "info",     ivn: "", dl: "" },
@@ -345,7 +352,7 @@ const FILL = { ok: "var(--accent)", degraded: "var(--serious)", broken: "var(--c
 
 let groupId = -1;
 document.querySelector("#scorecard tbody").innerHTML = ROWS.map((s, i) => {
-  if (s.divider) return `<tr class="divider-row"><td colspan="6">${s.divider}</td></tr>`;
+  if (s.divider) return `<tr class="divider-row"><td colspan="6"><span class="caret">▸</span>${s.divider}<span class="hint">click to expand</span></td></tr>`;
   if (!s.sub) groupId++;
   const hasSubs = !s.sub && ROWS[i + 1] && ROWS[i + 1].sub;
   const subCount = hasSubs ? ROWS.slice(i + 1).findIndex(r => !r.sub) === -1
@@ -378,6 +385,18 @@ document.querySelectorAll("#scorecard tr.expandable").forEach(row => {
       .forEach(sr => sr.classList.toggle("open"));
   });
 });
+
+const sectionDivider = document.querySelector("#scorecard tr.divider-row");
+if (sectionDivider) {
+  sectionDivider.addEventListener("click", () => {
+    const open = sectionDivider.classList.toggle("open");
+    document.querySelectorAll("#scorecard tr.main-row.dim").forEach(r => r.classList.toggle("section-open", open));
+    if (!open) {
+      document.querySelectorAll("#scorecard tr.sub-row.dim.open").forEach(r => r.classList.remove("open"));
+      document.querySelectorAll("#scorecard tr.main-row.dim.expanded").forEach(r => r.classList.remove("expanded"));
+    }
+  });
+}
 
 /* =========================================================================
    CHANGES & ROADMAP — edit this block only.
