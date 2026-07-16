@@ -350,32 +350,42 @@ document.querySelectorAll("#scorecard tr.expandable").forEach(row => {
    status: 'Shipped' | 'Coming' | 'In progress' | 'Spec ready' | 'RCA done'
    ========================================================================= */
 const ROADMAP = [
-  { item: "Per-task one-shot timeout timers rebuilt and switched on (P41 and related timers now fire per task)",
-    type: "Improvement", metric: "P41 Hit Rate — now 100%", status: "Shipped", date: "mid-Jun" },
-  { item: "Structured decline reasons — CSP must pick a reason when declining a task",
-    type: "Improvement", metric: "Response Rate / Decline Rate", status: "Coming", date: "17 Jul" },
+  { item: "P41: slot-proposal countdown timer — nudge the CSP before the ticket is removed",
+    type: "Gap", metric: "Response Rate", status: "Shipped", date: "29 Jun" },
+  { item: "Improved address + audio shown to the CSP",
+    type: "Gap", metric: "Response Rate", status: "Shipped", date: "29 Jun" },
+  { item: "Working hours change across OS — installation",
+    type: "Gap", metric: "Response Rate", status: "Shipped", date: "30 Jun" },
+  { item: "Incomplete address shown on FPN (frontend only)",
+    type: "Bug", metric: "—", status: "Shipped", date: "2 Jul" },
+  { item: "Security-deposit-paid event skipped when the install task is in pre-arrival states",
+    type: "Bug", metric: "—", status: "Shipped", date: "8 Jul" },
+  { item: "Guard blocking the P74 timeout from reallocating once the customer has paid the security deposit",
+    type: "Bug", metric: "P74 timeout / wrongful reallocations", status: "Shipped", date: "14 Jul" },
+  { item: "Booking amount refunded to the customer once the connection is deactivated",
+    type: "Bug", metric: "—", status: "Shipped", date: "14 Jul" },
+  { item: "Connection count incorrect as seen by CSPs in the app",
+    type: "Bug", metric: "—", status: "Shipped", date: "15 Jul" },
+  { item: "WhatsApp as fallback when FPN is not delivered — PN caps at ~90% (industry benchmark), so multi-channel is required",
+    type: "Gap", metric: "Task Reach Rate", status: "Scoping", date: "16 Jul" },
+  { item: "Nudges to the CSP during the installation flow to move forward",
+    type: "Gap", metric: "Response Rate", status: "Coming", date: "17 Jul" },
+  { item: "Exhaustive decline reasons for CSPs (structured options when declining)",
+    type: "Gap", metric: "Response Rate / Decline Rate", status: "Coming", date: "17 Jul" },
   { item: "Notification retries when a PN or FPN is not delivered",
-    type: "Improvement", metric: "Task Reach Rate", status: "Coming", date: "TBD" },
-  { item: "Offline channels (e.g. WhatsApp) as fallback — PN delivery caps at ~90% industry benchmark, so multi-channel is required",
-    type: "Improvement", metric: "Task Reach Rate", status: "Coming", date: "TBD" },
-  { item: "P41 response window increase (currently 2 working hours)",
-    type: "Parameter change", metric: "Unresponsive Rate", status: "Coming", date: "TBD" },
-  { item: "Timeout guard — no reallocation once the customer has paid the security fee",
-    type: "Improvement", metric: "Wrongful reallocations (P74 timeout)", status: "Spec ready", date: "TBD" },
-  { item: "Stage-wise nudges + live countdown to the response deadline on the CSP home feed",
-    type: "Improvement", metric: "Response Rate / Unresponsive Rate", status: "Spec ready", date: "TBD" },
+    type: "Gap", metric: "Task Reach Rate", status: "Coming", date: "TBD" },
+  { item: "CSP not told the task was removed when proposing a slot on a stale FPN",
+    type: "Bug", metric: "—", status: "Scoping", date: "TBD" },
+  { item: "P74 parameter change to 96 hours",
+    type: "Parameter change", metric: "P74 Timeout", status: "Planned", date: "TBD" },
   { item: "Zone loading fix — all zones loaded into the zones table",
     type: "Bug", metric: "Connection Assigned Rate", status: "In progress", date: "TBD" },
-  { item: "Zero-CSP zones: booking stuck unassigned after 5 routing retries, nothing ever re-triggers it",
-    type: "Bug", metric: "Connection Assigned Rate", status: "RCA done", date: "15 Jul" },
-  { item: "Install tasks stay open in the CSP app after the connection is cancelled (33 zombie tasks found)",
-    type: "Bug", metric: "Open-task hygiene / CSP task feed", status: "RCA done", date: "7 Jul" },
   { item: "Tasks missing the acceptance stamp can never receive their 72-hour timeout (22 found)",
     type: "Bug", metric: "P74 Hit Rate", status: "RCA done", date: "7 Jul" },
 ];
 
-const TCHIP = { "Bug": "bug", "Improvement": "improvement", "Parameter change": "parameter" };
-const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Spec ready": "spec", "RCA done": "rca" };
+const TCHIP = { "Bug": "bug", "Gap": "improvement", "Improvement": "improvement", "Parameter change": "parameter" };
+const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Scoping": "spec", "Planned": "spec", "Spec ready": "spec", "RCA done": "rca" };
 
 document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map((r, i) => `<tr>
   <td class="num" style="color: var(--muted);">${i + 1}</td>
