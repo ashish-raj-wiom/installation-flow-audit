@@ -262,8 +262,8 @@
         <tbody><!-- rendered by script --></tbody>
       </table>
     </div>
-    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Dates marked TBD are pending confirmation.
-    RCA = root cause identified, fix not yet scheduled.</p>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Sorted by date. Dates marked TBD are pending
+    confirmation.</p>
   </section>
 
   <div class="foot">
@@ -351,37 +351,35 @@ document.querySelectorAll("#scorecard tr.expandable").forEach(row => {
    ========================================================================= */
 const ROADMAP = [
   { item: "P41: slot-proposal countdown timer — nudge the CSP before the ticket is removed",
-    type: "Gap", metric: "Response Rate", status: "Shipped", date: "29 Jun" },
+    type: "Gap", metric: "Response Rate", mtype: "L2", status: "Shipped", date: "29 Jun" },
   { item: "Improved address + audio shown to the CSP",
-    type: "Gap", metric: "Response Rate", status: "Shipped", date: "29 Jun" },
+    type: "Gap", metric: "Response Rate", mtype: "L2", status: "Shipped", date: "29 Jun" },
   { item: "Working hours change across OS — installation",
-    type: "Gap", metric: "Response Rate", status: "Shipped", date: "30 Jun" },
+    type: "Gap", metric: "Response Rate", mtype: "L2", status: "Shipped", date: "30 Jun" },
   { item: "Incomplete address shown on FPN (frontend only)",
-    type: "Bug", metric: "—", status: "Shipped", date: "2 Jul" },
+    type: "Bug", metric: "—", mtype: "", status: "Shipped", date: "2 Jul" },
   { item: "Security-deposit-paid event skipped when the install task is in pre-arrival states",
-    type: "Bug", metric: "—", status: "Shipped", date: "8 Jul" },
-  { item: "Guard blocking the P74 timeout from reallocating once the customer has paid the security deposit",
-    type: "Bug", metric: "P74 timeout / wrongful reallocations", status: "Shipped", date: "14 Jul" },
-  { item: "Booking amount refunded to the customer once the connection is deactivated",
-    type: "Bug", metric: "—", status: "Shipped", date: "14 Jul" },
-  { item: "Connection count incorrect as seen by CSPs in the app",
-    type: "Bug", metric: "—", status: "Shipped", date: "15 Jul" },
-  { item: "WhatsApp as fallback when FPN is not delivered — PN caps at ~90% (industry benchmark), so multi-channel is required",
-    type: "Gap", metric: "Task Reach Rate", status: "Scoping", date: "16 Jul" },
-  { item: "Nudges to the CSP during the installation flow to move forward",
-    type: "Gap", metric: "Response Rate", status: "Coming", date: "17 Jul" },
-  { item: "Exhaustive decline reasons for CSPs (structured options when declining)",
-    type: "Gap", metric: "Response Rate / Decline Rate", status: "Coming", date: "17 Jul" },
-  { item: "Notification retries when a PN or FPN is not delivered",
-    type: "Gap", metric: "Task Reach Rate", status: "Coming", date: "TBD" },
-  { item: "CSP not told the task was removed when proposing a slot on a stale FPN",
-    type: "Bug", metric: "—", status: "Scoping", date: "TBD" },
+    type: "Bug", metric: "—", mtype: "", status: "Shipped", date: "8 Jul" },
   { item: "P74 parameter change to 96 hours",
-    type: "Parameter change", metric: "P74 Timeout", status: "Planned", date: "TBD" },
+    type: "Parameter change", metric: "P74 Timeout", mtype: "L1", status: "Shipped", date: "9 Jul" },
+  { item: "Guard blocking the P74 timeout from reallocating once the customer has paid the security deposit",
+    type: "Bug", metric: "P74 timeout / wrongful reallocations", mtype: "L1", status: "Shipped", date: "14 Jul" },
+  { item: "Booking amount refunded to the customer once the connection is deactivated",
+    type: "Bug", metric: "—", mtype: "", status: "Shipped", date: "14 Jul" },
+  { item: "Connection count incorrect as seen by CSPs in the app",
+    type: "Bug", metric: "—", mtype: "", status: "Shipped", date: "15 Jul" },
+  { item: "WhatsApp as fallback when FPN is not delivered — PN caps at ~90% (industry benchmark), so multi-channel is required",
+    type: "Gap", metric: "Task Reach Rate", mtype: "L1", status: "Scoping", date: "16 Jul" },
+  { item: "Nudges to the CSP during the installation flow to move forward",
+    type: "Gap", metric: "Response Rate", mtype: "L2", status: "Coming", date: "17 Jul" },
+  { item: "Exhaustive decline reasons for CSPs (structured options when declining)",
+    type: "Gap", metric: "Response Rate / Decline Rate", mtype: "L2", status: "Coming", date: "17 Jul" },
+  { item: "Notification retries when a PN or FPN is not delivered",
+    type: "Gap", metric: "Task Reach Rate", mtype: "L1", status: "Coming", date: "20 Jul" },
+  { item: "CSP not told the task was removed when proposing a slot on a stale FPN",
+    type: "Bug", metric: "—", mtype: "", status: "Coming", date: "21 Jul" },
   { item: "Zone loading fix — all zones loaded into the zones table",
-    type: "Bug", metric: "Connection Assigned Rate", status: "In progress", date: "TBD" },
-  { item: "Tasks missing the acceptance stamp can never receive their 72-hour timeout (22 found)",
-    type: "Bug", metric: "P74 Hit Rate", status: "RCA done", date: "7 Jul" },
+    type: "Bug", metric: "Connection Assigned Rate", mtype: "L1", status: "In progress", date: "TBD" },
 ];
 
 const TCHIP = { "Bug": "bug", "Gap": "improvement", "Improvement": "improvement", "Parameter change": "parameter" };
@@ -391,7 +389,7 @@ document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map((r, i) => `<tr>
   <td class="num" style="color: var(--muted);">${i + 1}</td>
   <td style="max-width: 46ch;">${r.item}</td>
   <td><span class="tchip ${TCHIP[r.type]}">${r.type}</span></td>
-  <td style="font-size: 12.5px; color: var(--ink-2);">${r.metric}</td>
+  <td style="font-size: 12.5px; color: var(--ink-2);">${r.mtype ? `<span class="badge ${r.mtype === "L1" ? "l1" : ""}">${r.mtype}</span> ` : ""}${r.metric}</td>
   <td><span class="schip ${SCHIP[r.status]}">${r.status}</span></td>
   <td class="num">${r.date}</td>
 </tr>`).join("");
