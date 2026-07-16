@@ -295,7 +295,7 @@ const ROWS = [
   { sub: true, stage: "PN Sent Rate",      formula: "Push notifications sent ÷ Tasks created",        type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { sub: true, stage: "FPN Sent Rate",     formula: "Full-page notifications sent ÷ Tasks created",   type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
 
-  { stage: "Task Reach Rate",              formula: "Any notification delivered ÷ Notifications sent", type: "L1", value: 89.4, status: "degraded", ivn: "1. Add retries if not delivered<br>2. Include offline channels like WhatsApp as fallback to increase the reach rate<br><span style='color: var(--muted); font-size: 11.5px;'>PN delivery cannot go beyond ~90% (industry benchmark), so multi-channel options are required</span>", dl: "TBD" },
+  { stage: "Task Reach Rate",              formula: "Any notification delivered ÷ Notifications sent", type: "L1", value: 89.4, status: "degraded", ivn: "1. Increase CleverTap \"preserve the message time\" from 10 min to 1 hr (16 Jul)<br>2. Add retries if not delivered (20 Jul)<br>3. Include offline channels like WhatsApp as fallback to increase the reach rate (TBD)<br><span style='color: var(--muted); font-size: 11.5px;'>PN delivery cannot go beyond ~90% (industry benchmark), so multi-channel options are required</span>", dl: "16 Jul" },
   { sub: true, stage: "PN Delivery Rate",  formula: "PN delivered ÷ PN sent",                         type: "L1", value: 89.4, status: "degraded", ivn: "", dl: "" },
   { sub: true, stage: "FPN Delivery Rate", formula: "FPN delivered ÷ FPN sent",                       type: "L1", value: 70,   status: "broken",   ivn: "", dl: "" },
 
@@ -405,6 +405,8 @@ const ROADMAP = [
     type: "Bug", metric: "—", mtype: "", status: "Shipped", date: "15 Jul" },
   { item: "WhatsApp as fallback when FPN is not delivered — PN caps at ~90% (industry benchmark), so multi-channel is required",
     type: "Gap", metric: "Task Reach Rate", mtype: "L1", status: "Scoping", date: "16 Jul" },
+  { item: "Increase CleverTap \"preserve the message time\" from 10 min to 1 hr",
+    type: "Gap", metric: "Task Reach Rate", mtype: "L1", status: "Coming", date: "16 Jul" },
   { item: "Nudges to the CSP during the installation flow to move forward",
     type: "Gap", metric: "Response Rate", mtype: "L2", status: "Coming", date: "17 Jul" },
   { item: "Exhaustive decline reasons for CSPs (structured options when declining)",
