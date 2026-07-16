@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Installation Flow Audit — CSP Response Bottleneck</title>
+<title>Installation Flow — Health &amp; Roadmap</title>
 <style>
   :root {
     color-scheme: light;
@@ -122,14 +122,21 @@
   .meter .fill { height: 100%; border-radius: 0 4px 4px 0; }
   .meter.na .track { background: repeating-linear-gradient(45deg, var(--grid), var(--grid) 4px, var(--surface) 4px, var(--surface) 8px); }
 
-  .stack { display: flex; height: 44px; border-radius: 8px; overflow: hidden; margin-top: 14px; }
-  .seg { display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 650; min-width: 0; }
-  .seg + .seg { border-left: 2px solid var(--surface); }
-  .seg small { font-weight: 500; opacity: 0.9; margin-left: 6px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 12.5px; color: var(--ink-2); }
-  .legend .key { display: inline-flex; align-items: center; gap: 6px; }
-  .legend .sw { width: 10px; height: 10px; border-radius: 3px; }
   h3 { font-size: 15px; font-weight: 650; margin: 20px 0 6px; }
+  .tile-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+  @media (max-width: 900px) { .tile-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .tile-row { grid-template-columns: 1fr; } }
+  .tchip { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .tchip.bug         { color: var(--critical); background: color-mix(in srgb, var(--critical) 10%, var(--surface)); }
+  .tchip.improvement { color: var(--accent);   background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+  .tchip.parameter   { color: var(--ink-2);    background: color-mix(in srgb, var(--muted) 14%, var(--surface)); }
+  .schip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+  .schip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .schip.shipped  { color: var(--good-text); }
+  .schip.coming   { color: var(--accent); }
+  .schip.progress { color: var(--serious); }
+  .schip.spec     { color: var(--ink-2); }
+  .schip.rca      { color: var(--critical); }
 
   .foot { margin-top: 50px; padding-top: 16px; border-top: 1px solid var(--grid); font-size: 12px; color: var(--muted); }
 </style>
@@ -139,50 +146,49 @@
 
   <!-- ============ HEADER ============ -->
   <header>
-    <div class="eyebrow">Installation Flow · Leadership Audit</div>
-    <h1>More than half of installation tasks die waiting for a CSP response</h1>
-    <p class="sub">Stage-by-stage health of the booking → installation funnel, the interventions in flight, and their
-    deadlines. System metrics (L1) should sit at ~100%; workflow metrics (L2) are moved by product and behavior.</p>
+    <div class="eyebrow">Installation Flow · Health &amp; Roadmap</div>
+    <h1>Installation flow — health and roadmap</h1>
+    <p class="sub">Every step of the booking → installation funnel with its current health, and the change log —
+    what shipped, what's coming, and what each change moves. System metrics (L1) should sit at ~100%; workflow
+    metrics (L2) are moved by product and behavior.</p>
     <div class="meta-row">
       <span class="meta-chip">Data: 14 Jul 2026 (D-1)</span>
       <span class="meta-chip">Owner: Ashish Raj</span>
-      <span class="meta-chip">Prepared: 15 Jul 2026</span>
+      <span class="meta-chip">Prepared: 16 Jul 2026</span>
     </div>
   </header>
 
-  <!-- ============ HEADLINE ============ -->
+  <!-- ============ OVERALL HEALTH ============ -->
   <section>
-    <div class="kicker">The headline</div>
-    <h2>54.5% of tasks time out because the CSP never responds</h2>
-    <div class="hero-grid">
-      <div class="card">
-        <div class="hero-num" style="color: var(--critical);">54.5%</div>
-        <div class="hero-label">of all tasks created ended <strong>unresponsive</strong> — the CSP neither proposed a
-        slot nor declined within the 2-working-hour response window, and the booking had to be reassigned. The single
-        biggest fall-off in the flow.</div>
+    <div class="kicker">Overall health</div>
+    <h2>System plumbing is healthy — the gaps are delivery and response</h2>
+    <div class="tile-row">
+      <div class="tile">
+        <div class="t-label">System health (L1)</div>
+        <div class="t-value">8 of 11</div>
+        <div class="t-note">L1 checks at target — every miss is in notification delivery</div>
       </div>
-      <div class="kpi-grid">
-        <div class="tile">
-          <div class="t-label">Notification sent</div>
-          <div class="t-value">100%</div>
-          <div class="t-note">Every task triggers a notification to the CSP</div>
-        </div>
-        <div class="tile">
-          <div class="t-label">Task reach rate</div>
-          <div class="t-value">89.4%</div>
-          <div class="t-note">Notification actually reached the CSP's phone</div>
-        </div>
-        <div class="tile">
-          <div class="t-label">Task open rate</div>
-          <div class="t-value">84.9%</div>
-          <div class="t-note">CSP saw the task (notification or in-app)</div>
-        </div>
-        <div class="tile">
-          <div class="t-label">Response rate (of opened)</div>
-          <div class="t-value" style="color: var(--critical);">53.8%</div>
-          <div class="t-note">Nearly half open the task and go silent</div>
-        </div>
+      <div class="tile">
+        <div class="t-label">Task reach rate (L1)</div>
+        <div class="t-value" style="color: var(--serious);">89.4%</div>
+        <div class="t-note">PN 89.4% · FPN 70% — dated fixes below (17–22 Jul)</div>
       </div>
+      <div class="tile">
+        <div class="t-label">Weakest workflow step (L2)</div>
+        <div class="t-value" style="color: var(--critical);">53.8%</div>
+        <div class="t-note">Response rate — covered separately in the non-responsiveness overview</div>
+      </div>
+      <div class="tile">
+        <div class="t-label">End-to-end conversion</div>
+        <div class="t-value">32.4%</div>
+        <div class="t-note">Of bookings get a slot proposed by the first assigned CSP</div>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Reading:</strong> everything from booking to task creation runs at 99.6–100%, and the timeout timer
+      itself fires on 100% of eligible tasks. The two health gaps are <strong>notification delivery</strong>
+      (L1 — owned here, fixes dated below) and <strong>CSP response</strong> (L2 — quantified here, problem deep-dive
+      in the separate non-responsiveness doc).
     </div>
   </section>
 
@@ -243,32 +249,29 @@
     Open — a task can be opened via both, so the components don't add up to the parent.</p>
   </section>
 
-  <!-- ============ OUTCOMES ============ -->
+  <!-- ============ ROADMAP ============ -->
   <section>
-    <div class="kicker">Outcome mix</div>
-    <h2>Of every 100 tasks created</h2>
-    <div class="card">
-      <div class="stack" aria-label="Outcome mix of 100 created tasks">
-        <div class="seg" style="width: 32.4%; background: var(--good); color: #fff;">Slot proposed<small>32.4</small></div>
-        <div class="seg" style="width: 13.2%; background: var(--warning); color: #0b0b0b;">Declined<small>13.2</small></div>
-        <div class="seg" style="width: 54.5%; background: var(--critical); color: #fff;">Unresponsive<small>54.5</small></div>
-      </div>
-      <div class="legend">
-        <span class="key"><span class="sw" style="background: var(--good);"></span>✓ Slot proposed — install proceeds</span>
-        <span class="key"><span class="sw" style="background: var(--warning);"></span>↻ Declined — instant reassignment</span>
-        <span class="key"><span class="sw" style="background: var(--critical);"></span>✕ Unresponsive — customer waits 2 working hours, then reassignment</span>
-      </div>
-
-      <h3>What the 54.5 unresponsive tasks are made of</h3>
-      <div class="stack" style="height: 38px;" aria-label="Unresponsive decomposition">
-        <div class="seg" style="width: 27.7%; background: var(--accent-soft); color: #0b0b0b;">Never opened<small>15.1</small></div>
-        <div class="seg" style="width: 72.3%; background: var(--accent); color: #fff;">Opened, then silent<small>39.4</small></div>
-      </div>
-      <div class="legend">
-        <span class="key"><span class="sw" style="background: var(--accent-soft);"></span>Never opened — task never seen by the CSP</span>
-        <span class="key"><span class="sw" style="background: var(--accent);"></span>Opened, then silent — no slot proposed, no decline</span>
-      </div>
+    <div class="kicker">Changes &amp; roadmap</div>
+    <h2>What's shipped, what's coming, and what each change moves</h2>
+    <p class="lede">Every change touching this funnel — bugs found, improvements, and parameter changes — with the
+    metric it impacts and its release or RCA date.</p>
+    <div class="tbl-scroll">
+      <table id="roadmap">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Change</th>
+            <th>Type</th>
+            <th>Metric it impacts</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody><!-- rendered by script --></tbody>
+      </table>
     </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Dates marked TBD are pending confirmation.
+    RCA = root cause identified, fix not yet scheduled.</p>
   </section>
 
   <div class="foot">
@@ -348,6 +351,48 @@ document.querySelectorAll("#scorecard tr.expandable").forEach(row => {
       .forEach(sr => sr.classList.toggle("open"));
   });
 });
+
+/* =========================================================================
+   CHANGES & ROADMAP — edit this block only.
+   type:   'Bug' | 'Improvement' | 'Parameter change'
+   status: 'Shipped' | 'Coming' | 'In progress' | 'Spec ready' | 'RCA done'
+   ========================================================================= */
+const ROADMAP = [
+  { item: "Per-task one-shot timeout timers rebuilt and switched on (P41 and related timers now fire per task)",
+    type: "Improvement", metric: "P41 Hit Rate — now 100%", status: "Shipped", date: "mid-Jun" },
+  { item: "Structured decline reasons — CSP must pick a reason when declining a task",
+    type: "Improvement", metric: "Response Rate / Decline Rate", status: "Coming", date: "17 Jul" },
+  { item: "Notification triggering moved to Firebase (from CleverTap)",
+    type: "Improvement", metric: "PN Delivery → Task Reach Rate", status: "Coming", date: "21 Jul" },
+  { item: "Overlay added as a fallback when PN and FPN fail to deliver",
+    type: "Improvement", metric: "Task Reach Rate", status: "Coming", date: "22 Jul" },
+  { item: "P41 response window increase (currently 2 working hours)",
+    type: "Parameter change", metric: "Unresponsive Rate", status: "Coming", date: "TBD" },
+  { item: "Timeout guard — no reallocation once the customer has paid the security fee",
+    type: "Improvement", metric: "Wrongful reallocations (P74 timeout)", status: "Spec ready", date: "TBD" },
+  { item: "Stage-wise nudges + live countdown to the response deadline on the CSP home feed",
+    type: "Improvement", metric: "Response Rate / Unresponsive Rate", status: "Spec ready", date: "TBD" },
+  { item: "Zone loading fix — all zones loaded into the zones table",
+    type: "Bug", metric: "Connection Assigned Rate", status: "In progress", date: "TBD" },
+  { item: "Zero-CSP zones: booking stuck unassigned after 5 routing retries, nothing ever re-triggers it",
+    type: "Bug", metric: "Connection Assigned Rate", status: "RCA done", date: "15 Jul" },
+  { item: "Install tasks stay open in the CSP app after the connection is cancelled (33 zombie tasks found)",
+    type: "Bug", metric: "Open-task hygiene / CSP task feed", status: "RCA done", date: "7 Jul" },
+  { item: "Tasks missing the acceptance stamp can never receive their 72-hour timeout (22 found)",
+    type: "Bug", metric: "P74 Hit Rate", status: "RCA done", date: "7 Jul" },
+];
+
+const TCHIP = { "Bug": "bug", "Improvement": "improvement", "Parameter change": "parameter" };
+const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Spec ready": "spec", "RCA done": "rca" };
+
+document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map((r, i) => `<tr>
+  <td class="num" style="color: var(--muted);">${i + 1}</td>
+  <td style="max-width: 46ch;">${r.item}</td>
+  <td><span class="tchip ${TCHIP[r.type]}">${r.type}</span></td>
+  <td style="font-size: 12.5px; color: var(--ink-2);">${r.metric}</td>
+  <td><span class="schip ${SCHIP[r.status]}">${r.status}</span></td>
+  <td class="num">${r.date}</td>
+</tr>`).join("");
 </script>
 </body>
 </html>
