@@ -251,12 +251,11 @@
       <table id="roadmap">
         <thead>
           <tr>
-            <th>#</th>
+            <th>Date</th>
             <th>Change</th>
             <th>Type</th>
             <th>Metric it impacts</th>
             <th>Status</th>
-            <th>Date</th>
           </tr>
         </thead>
         <tbody><!-- rendered by script --></tbody>
@@ -387,13 +386,12 @@ const ROADMAP = [
 const TCHIP = { "Bug": "bug", "Gap": "improvement", "Improvement": "improvement", "Parameter change": "parameter" };
 const SCHIP = { "Shipped": "shipped", "Coming": "coming", "In progress": "progress", "Scoping": "spec", "Planned": "spec", "Spec ready": "spec", "RCA done": "rca" };
 
-document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map((r, i) => `<tr>
-  <td class="num" style="color: var(--muted);">${i + 1}</td>
+document.querySelector("#roadmap tbody").innerHTML = ROADMAP.map(r => `<tr>
+  <td class="num">${r.date}</td>
   <td style="max-width: 46ch;">${r.item}</td>
   <td><span class="tchip ${TCHIP[r.type]}">${r.type}</span></td>
   <td style="font-size: 12.5px; color: var(--ink-2);">${r.mtype ? `<span class="badge ${r.mtype === "L1" ? "l1" : ""}">${r.mtype}</span> ` : ""}${r.metric}</td>
   <td><span class="schip ${SCHIP[r.status]}">${r.status}</span></td>
-  <td class="num">${r.date}</td>
 </tr>`).join("");
 </script>
 </body>
