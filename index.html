@@ -295,7 +295,7 @@ const ROWS = [
   { stage: "# Bookings Verified",          formula: "Bookings verified",                              type: "",   value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Creation Rate",     formula: "Connections created ÷ Bookings",                 type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
   { stage: "Connection Requested Rate",    formula: "Connections requested ÷ Connections created",    type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
-  { stage: "Connection Assigned Rate",     formula: "CSP assigned ÷ Connections requested",           type: "L1", value: 99.6, status: "ok",       ivn: "", dl: "" },
+  { stage: "Connection Assigned Rate",     formula: "CSP assigned ÷ Connections requested",           type: "L1", value: 99.6, status: "ok",       ivn: "Zone loading fix — all zones loaded into the zones table", dl: "20 Jul" },
   { stage: "Task Creation Rate",           formula: "Tasks created ÷ Connections assigned",           type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
 
   { stage: "Notification Sent Rate",       formula: "PN + FPN sent ÷ Tasks created",                  type: "L1", value: 100,  status: "ok",       ivn: "", dl: "" },
@@ -432,12 +432,12 @@ const ROADMAP = [
     type: "Gap", metric: "Response Rate / Decline Rate", mtype: "L2", status: "Coming", date: "17 Jul" },
   { item: "Notification retries when a PN or FPN is not delivered",
     type: "Gap", metric: "Task Reach Rate", mtype: "L1", status: "Coming", date: "20 Jul" },
+  { item: "Zone loading fix — all zones loaded into the zones table",
+    type: "Bug", metric: "Connection Assigned Rate", mtype: "L1", status: "In progress", date: "20 Jul" },
   { item: "CSP not told the task was removed when proposing a slot on a stale FPN",
     type: "Bug", metric: "—", mtype: "", status: "Coming", date: "21 Jul" },
   { item: "Educating the CSP to decline if the booking is not suitable",
     type: "Gap", metric: "Response Rate / Decline Rate", mtype: "L2", status: "Coming", date: "TBD" },
-  { item: "Zone loading fix — all zones loaded into the zones table",
-    type: "Bug", metric: "Connection Assigned Rate", mtype: "L1", status: "In progress", date: "TBD" },
 ];
 
 const TCHIP = { "Bug": "bug", "Gap": "improvement", "Improvement": "improvement", "Parameter change": "parameter" };
